@@ -52,17 +52,19 @@ jobs:
           echo "::set-output name=commit::$(git rev-parse --short HEAD)"
 
       - name: Build Apache IoTDB binaries
-        id: build_binary
         run: |
           cd ${{ steps.pwd.outputs.pwd }}/iotdb
           mvn clean package -pl distribution -am -DskipTests
 
       - name: Run IoTDB
+        id: run-iotdb
         run: |
+          cd ${{ steps.pwd.outputs.pwd }}/iotdb/distribution/target/apache-iotdb-0.13.0-SNAPSHOT-all-bin/apache-iotdb-0.13.0-SNAPSHOT-all-bin
           nohup sbin/start-server.sh >/dev/null 2>&1 &
           sleep 5
           iotdb_pid=$(jps -l | grep 'org.apache.iotdb.db.service.IoTDB' | awk '{print $1}')
           echo IoTDB\'s PID is ${iotdb_pid}
+          echo "::set-output name=iotdb-pid::$(${iotdb_pid})"
 
       - name: Checkout thulab/iotdb-benchmark
         uses: actions/checkout@v2
