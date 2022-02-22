@@ -57,7 +57,7 @@ jobs:
       - name: Build Apache IoTDB binaries
         id: build_binary
         run: |
-          cd /iotdb
+          cd ${{ steps.pwd.outputs.pwd }}/iotdb
           mvn clean package -pl distribution -am -DskipTests
           cp -rf distribution/target/apache-iotdb-0.12.5-SNAPSHOT-all-bin.zip /assets/apache-iotdb-0.12.5-SNAPSHOT-all-bin.zip
           cp -rf distribution/target/apache-iotdb-0.12.5-SNAPSHOT-cli-bin.zip /assets/apache-iotdb-0.12.5-SNAPSHOT-cli-bin.zip
@@ -83,11 +83,12 @@ jobs:
       - name: Collect benchmark information
         id: benchmark-information
         run: |
+          cd ${{ steps.pwd.outputs.pwd }}/iotdb-benchmark
           echo "::set-output name=commit::$(git rev-parse --short HEAD)"
 
       - name: Build benchmark binaries
         run: |
-          cd /iotdb-benchmark
+          cd ${{ steps.pwd.outputs.pwd }}/iotdb-benchmark
           mvn spotless:apply -q
           mvn clean package -pl core,iotdb-0.12 -Dmaven.test.skip=true
           zip -r /assets/benchmark-0.12-${{ steps.datetime-information.outputs.date }}-${{ steps.benchmark-information.outputs.commit }}-java-${{ matrix.java }}.zip /iotdb-benchmark/iotdb-0.12/target/iotdb-0.12-0.0.1
