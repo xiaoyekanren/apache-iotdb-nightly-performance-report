@@ -14,6 +14,7 @@ env:
 jobs:
   test-0-12:
     strategy:
+      max-parallel: 20
       matrix:
         java: [ 8, 11 ]
         os: [ ubuntu-latest ]
@@ -42,7 +43,14 @@ jobs:
 
       - name: Build Apache IoTDB binaries
         id: build_binary
-        run: mvn clean package -pl distribution -am -DskipTests
+        run: |
+          mvn clean package -pl distribution -am -DskipTests
+          cp -rf distribution/target/apache-iotdb-0.12.5-SNAPSHOT-all-bin.zip /assets/apache-iotdb-0.12.5-SNAPSHOT-all-bin.zip
+          cp -rf distribution/target/apache-iotdb-0.12.5-SNAPSHOT-cli-bin.zip /assets/apache-iotdb-0.12.5-SNAPSHOT-cli-bin.zip
+          cp -rf distribution/target/apache-iotdb-0.12.5-SNAPSHOT-cluster-bin.zip /assets/apache-iotdb-0.12.5-SNAPSHOT-cluster-bin.zip
+          cp -rf distribution/target/apache-iotdb-0.12.5-SNAPSHOT-grafana-bin.zip /assets/apache-iotdb-0.12.5-SNAPSHOT-grafana-bin.zip
+          cp -rf distribution/target/apache-iotdb-0.12.5-SNAPSHOT-server-bin.zip /assets/apache-iotdb-0.12.5-SNAPSHOT-server-bin.zip
+          cp -rf distribution/target/apache-iotdb-0.12.5-SNAPSHOT-server-bin.zip /test/apache-iotdb-0.12.5-SNAPSHOT-server-bin.zip
 
       - name: Create release
         id: create_release
@@ -67,7 +75,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: distribution/target/apache-iotdb-0.12.5-SNAPSHOT-all-bin.zip
+          asset_path: /assets/apache-iotdb-0.12.5-SNAPSHOT-all-bin.zip
           asset_name: apache-iotdb-0.12.5-SNAPSHOT-all-bin-nightly-${{ steps.information.outputs.date }}-${{ steps.information.outputs.commit }}-java-${{ matrix.java }}.zip
           asset_content_type: application/zip
 
@@ -77,7 +85,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: distribution/target/apache-iotdb-0.12.5-SNAPSHOT-cli-bin.zip
+          asset_path: /assets/apache-iotdb-0.12.5-SNAPSHOT-cli-bin.zip
           asset_name: apache-iotdb-0.12.5-SNAPSHOT-cli-bin-nightly-${{ steps.information.outputs.date }}-${{ steps.information.outputs.commit }}-java-${{ matrix.java }}.zip
           asset_content_type: application/zip
 
@@ -87,7 +95,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: distribution/target/apache-iotdb-0.12.5-SNAPSHOT-cluster-bin.zip
+          asset_path: /assets/apache-iotdb-0.12.5-SNAPSHOT-cluster-bin.zip
           asset_name: apache-iotdb-0.12.5-SNAPSHOT-cluster-bin-nightly-${{ steps.information.outputs.date }}-${{ steps.information.outputs.commit }}-java-${{ matrix.java }}.zip
           asset_content_type: application/zip
 
@@ -97,7 +105,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: distribution/target/apache-iotdb-0.12.5-SNAPSHOT-grafana-bin.zip
+          asset_path: /assets/apache-iotdb-0.12.5-SNAPSHOT-grafana-bin.zip
           asset_name: apache-iotdb-0.12.5-SNAPSHOT-grafana-bin-nightly-${{ steps.information.outputs.date }}-${{ steps.information.outputs.commit }}-java-${{ matrix.java }}.zip
           asset_content_type: application/zip
 
@@ -107,6 +115,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: distribution/target/apache-iotdb-0.12.5-SNAPSHOT-server-bin.zip
+          asset_path: /assets/apache-iotdb-0.12.5-SNAPSHOT-server-bin.zip
           asset_name: apache-iotdb-0.12.5-SNAPSHOT-server-bin-nightly-${{ steps.information.outputs.date }}-${{ steps.information.outputs.commit }}-java-${{ matrix.java }}.zip
           asset_content_type: application/zip
