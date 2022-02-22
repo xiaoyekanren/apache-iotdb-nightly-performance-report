@@ -83,6 +83,45 @@ jobs:
           cd ${{ steps.pwd.outputs.pwd }}/iotdb-benchmark
           mvn clean package -pl core,iotdb-0.12 -Dmaven.test.skip=true
 
+      - name: Do performance test
+        id: performance-test
+        run: |
+          benchmark_bin_home=${{ steps.pwd.outputs.pwd }}/iotdb-benchmark/iotdb-0.12/target/iotdb-0.12-0.0.1
+
+          echo modify benchmark config ...
+          modi_benchmark_config() {
+              benchmark_conf=${benchmark_bin_home}/conf/config.properties
+              sed -i 's/^LOOP.*/LOOP=100000/g' ${benchmark_conf}
+          }
+          modi_benchmark_config
+
+          echo define benchmark output log file...
+          bm_log_file=${benchmark_bin_home}/benchmark_log.txt
+
+          echo start benchmark 1st...
+          start_benchmark() {
+              cd ${benchmark_bin_home}
+              nohup ./benchmark.sh >${bm_log_file} &
+              sleep .5
+              echo "::set-output name=benchmark-pid::$(jps -l | grep 'cn.edu.tsinghua.iotdb.benchmark.App' | awk '{print $1}')"
+          }
+          start_benchmark
+
+          echo listen pid , until 1st benchmark over...
+          while true; do
+              if test $(jps -l | grep 'cn.edu.tsinghua.iotdb.benchmark.App' | awk '{print $1}'); then
+                  echo benchmark not finish...
+                  tail -n 1 ${bm_log_file}
+                  sleep 3
+              else
+                  echo benchmark over...
+                  break
+              fi
+          done
+
+          echo kill IoTDB...
+          kill -9 ${{ steps.run-iotdb.iotdb.pid }}
+
       - name: Create release
         id: create_release
         uses: actions/create-release@v1
