@@ -60,7 +60,7 @@ jobs:
         id: run-iotdb
         run: |
           cd ${{ steps.pwd.outputs.pwd }}/iotdb/distribution/target/apache-iotdb-0.12.5-SNAPSHOT-all-bin/apache-iotdb-0.12.5-SNAPSHOT-all-bin
-          nohup sbin/start-server.sh >/dev/null 2>&1 &
+          nohup sbin/start-server.sh >${{ steps.pwd.outputs.pwd }}/iotdb/iotdb-log.txt 2>&1 &
           sleep 5
           echo "::set-output name=iotdb-pid::$(jps -l | grep 'org.apache.iotdb.db.service.IoTDB' | awk '{print $1}')"
 
@@ -88,7 +88,7 @@ jobs:
         run: |
           benchmark_bin_home=${{ steps.pwd.outputs.pwd }}/iotdb-benchmark/iotdb-0.12/target/iotdb-0.12-0.0.1
 
-          echo modify benchmark config ...
+          echo modify benchmark config...
           modi_benchmark_config() {
               benchmark_conf=${benchmark_bin_home}/conf/config.properties
               sed -i 's/^LOOP.*/LOOP=100000/g' ${benchmark_conf}
@@ -96,9 +96,9 @@ jobs:
           modi_benchmark_config
 
           echo define benchmark output log file...
-          bm_log_file=${benchmark_bin_home}/benchmark_log.txt
+          bm_log_file=${benchmark_bin_home}/benchmark-log.txt
 
-          echo start benchmark 1st...
+          echo start benchmarking...
           start_benchmark() {
               cd ${benchmark_bin_home}
               nohup ./benchmark.sh >${bm_log_file} &
@@ -107,20 +107,19 @@ jobs:
           }
           start_benchmark
 
-          echo listen pid , until 1st benchmark over...
+          echo listening pid...
           while true; do
               if test $(jps -l | grep 'cn.edu.tsinghua.iotdb.benchmark.App' | awk '{print $1}'); then
-                  echo benchmark not finish...
                   tail -n 1 ${bm_log_file}
-                  sleep 3
+                  sleep 1
               else
-                  echo benchmark over...
+                  echo done!
                   break
               fi
           done
 
           echo kill IoTDB...
-          kill -9 ${{ steps.run-iotdb.iotdb.pid }}
+          kill -9 ${{ steps.run-iotdb.outputs.iotdb-pid }}
 
       - name: Create release
         id: create_release
@@ -190,6 +189,16 @@ jobs:
           asset_name: apache-iotdb-0.12.5-SNAPSHOT-server-bin-nightly-${{ steps.datetime-information.outputs.date }}-${{ steps.iotdb-information.outputs.commit }}-java-${{ matrix.java }}.zip
           asset_content_type: application/zip
 
+      - name: Upload iotdb log
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ${{ steps.pwd.outputs.pwd }}/iotdb/iotdb-log.txt
+          asset_name: apache-iotdb-0.12.5-SNAPSHOT-server-bin-nightly-${{ steps.datetime-information.outputs.date }}-${{ steps.iotdb-information.outputs.commit }}-java-${{ matrix.java }}.log.txt
+          asset_content_type: text/plain
+
       - name: Upload iotdb-benchmark binary
         uses: actions/upload-release-asset@v1
         env:
@@ -199,3 +208,13 @@ jobs:
           asset_path: ${{ steps.pwd.outputs.pwd }}/iotdb-benchmark/iotdb-0.12/target/iotdb-0.12-0.0.1.zip
           asset_name: iotdb-benchmark-0.12-${{ steps.datetime-information.outputs.date }}-${{ steps.benchmark-information.outputs.commit }}-java-${{ matrix.java }}.zip
           asset_content_type: application/zip
+
+      - name: Upload iotdb-benchmark log
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ${{ steps.pwd.outputs.pwd }}/iotdb-benchmark/iotdb-0.12/target/iotdb-0.12-0.0.1/benchmark-log.txt
+          asset_name: iotdb-benchmark-0.12-${{ steps.datetime-information.outputs.date }}-${{ steps.benchmark-information.outputs.commit }}-java-${{ matrix.java }}.log.txt
+          asset_content_type: text/plain
