@@ -59,11 +59,10 @@ jobs:
       - name: Run IoTDB
         id: run-iotdb
         run: |
-          cd ${{ steps.pwd.outputs.pwd }}/iotdb/distribution/target/apache-iotdb-0.13.0-SNAPSHOT-all-bin/apache-iotdb-0.13.0-SNAPSHOT-all-bin
+          cd ${{ steps.pwd.outputs.pwd }}/iotdb/distribution/target/apache-iotdb-0.12.5-SNAPSHOT-all-bin/apache-iotdb-0.12.5-SNAPSHOT-all-bin
           nohup sbin/start-server.sh >/dev/null 2>&1 &
           sleep 5
           iotdb_pid=$(jps -l | grep 'org.apache.iotdb.db.service.IoTDB' | awk '{print $1}')
-          echo IoTDB\'s PID is ${iotdb_pid}
           echo "::set-output name=iotdb-pid::$(${iotdb_pid})"
 
       - name: Checkout thulab/iotdb-benchmark
@@ -83,9 +82,8 @@ jobs:
       - name: Build benchmark binaries
         run: |
           cd ${{ steps.pwd.outputs.pwd }}/iotdb-benchmark
-          mvn spotless:apply -q
           mvn clean package -pl core,iotdb-0.12 -Dmaven.test.skip=true
-          zip -r /assets/benchmark-0.12-${{ steps.datetime-information.outputs.date }}-${{ steps.benchmark-information.outputs.commit }}-java-${{ matrix.java }}.zip /iotdb-benchmark/iotdb-0.12/target/iotdb-0.12-0.0.1
+          zip -r benchmark-0.12-${{ steps.datetime-information.outputs.date }}-${{ steps.benchmark-information.outputs.commit }}-java-${{ matrix.java }}.zip /iotdb-benchmark/iotdb-0.12/target/iotdb-0.12-0.0.1
 
       - name: Create release
         id: create_release
