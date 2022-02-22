@@ -22,6 +22,10 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
+      - name: Current base dir
+        id: pwd
+        run: echo "::set-output name=pwd::$(pwd)"
+
       - name: Collect datetime information
         id: datetime-information
         run: |
@@ -39,7 +43,7 @@ jobs:
       - name: Checkout apache/iotdb
         uses: actions/checkout@v2
         with:
-          path: /iotdb
+          path: iotdb
           repository: 'apache/iotdb'
           ref: rel/0.12
           fetch-depth: 0
@@ -47,7 +51,7 @@ jobs:
       - name: Collect IoTDB information
         id: iotdb-information
         run: |
-          cd /iotdb
+          cd ${{ steps.pwd.outputs.pwd }}/iotdb
           echo "::set-output name=commit::$(git rev-parse --short HEAD)"
 
       - name: Build Apache IoTDB binaries
@@ -71,7 +75,7 @@ jobs:
       - name: Checkout thulab/iotdb-benchmark
         uses: actions/checkout@v2
         with:
-          path: /iotdb-benchmark
+          path: iotdb-benchmark
           repository: 'thulab/iotdb-benchmark'
           ref: master
           fetch-depth: 0
@@ -79,7 +83,6 @@ jobs:
       - name: Collect benchmark information
         id: benchmark-information
         run: |
-          cd /iotdb
           echo "::set-output name=commit::$(git rev-parse --short HEAD)"
 
       - name: Build benchmark binaries
