@@ -59,26 +59,10 @@ jobs:
       - name: Run IoTDB
         id: run-iotdb
         run: |
-          
-          sudo apt-get install tree -y
-          
-          echo -----
-          echo pwd
-          pwd
-          
-          echo -----
-          echo 'steps.pwd.outputs.pwd'
-          pwd=`pwd`
-          cd ${{ steps.pwd.outputs.pwd }}
-          pwd
-          cd $pwd
-          
-          echo -----
-          echo tree
-          tree -d
           echo ----- 
-
-          
+          echo $(java -version) > ${{ steps.pwd.outputs.pwd }}/_java_version
+          echo $(python3 -V) > ${{ steps.pwd.outputs.pwd }}/_python_version
+          echo ----- 
           cd ${{ steps.pwd.outputs.pwd }}/iotdb/distribution/target/apache-iotdb-0.12.6-SNAPSHOT-all-bin/apache-iotdb-0.12.6-SNAPSHOT-all-bin
           nohup sbin/start-server.sh >${{ steps.pwd.outputs.pwd }}/iotdb/iotdb-log.txt 2>&1 &
           sleep 5
@@ -248,3 +232,23 @@ jobs:
           asset_path: ${{ steps.pwd.outputs.pwd }}/iotdb-benchmark/iotdb-0.12/target/iotdb-0.12-0.0.1/conf/config.properties
           asset_name: iotdb-benchmark-0.12-${{ steps.datetime-information.outputs.date }}-${{ steps.benchmark-information.outputs.commit }}-java-${{ matrix.java }}.config.properties
           asset_content_type: text/plain
+
+      - name: Checkout apache-iotdb-nightly-performance-report
+        uses: actions/checkout@v2
+        with:
+          path: iotdb-benchmark
+          repository: 'xiaoyekanren/apache-iotdb-nightly-performance-report'
+          ref: master
+          fetch-depth: 0
+
+      - name: generate test information
+        id: generate
+        run: |
+          echo $(java -version) > ${{ steps.pwd.outputs.pwd }}/_java_version
+          echo $(python3 -V) > ${{ steps.pwd.outputs.pwd }}/_python_version
+          
+          cd ${{ steps.pwd.outputs.pwd }}/apache-iotdb-nightly-performance-report/benchmark_log_parser/bin
+          git status
+          git branch
+          python3 add_path.py add_python_path
+          python3 add_path.py print_python_path
