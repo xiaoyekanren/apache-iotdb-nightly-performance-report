@@ -244,7 +244,7 @@ jobs:
       - name: Write results to sql
         id: save-sql
         run: |
-          apt-get install python3 -y
+          sudo apt-get install python3 -y
           ls /usr/bin/python*
 ##          echo $(java -version) > ${{ steps.pwd.outputs.pwd }}/_java_version
 ##          echo $(python -V) > ${{ steps.pwd.outputs.pwd }}/_python_version; echo $(python3 -V) > ${{ steps.pwd.outputs.pwd }}/_python_version
