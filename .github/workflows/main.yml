@@ -259,6 +259,7 @@ jobs:
           tree -d
           echo -----
           echo find ../
+          find ../
           echo -----
           echo ls 
           ls -l ../*/
