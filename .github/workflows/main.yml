@@ -242,24 +242,17 @@ jobs:
           ref: add_more_para
           fetch-depth: 0
 
-#      - name: Set up Python 3.9
-#        uses: actions/setup-python@v1
-#        with:
-#          python-version: 3.9
-
       - name: Write results to sql
         id: save-sql
         run: |
           apt-get install python3 -y
 #          echo $(java -version) > ${{ steps.pwd.outputs.pwd }}/_java_version
 #          echo $(python -V) > ${{ steps.pwd.outputs.pwd }}/_python_version; echo $(python3 -V) > ${{ steps.pwd.outputs.pwd }}/_python_version
-          
           cd ${{ steps.pwd.outputs.pwd }}/apache-iotdb-nightly-performance-report/benchmark_log_parser/bin
           python3 add_path.py add_python_path
           python3 add_path.py print_python_path
           echo -----
           python3 run.py ${{ steps.pwd.outputs.pwd }}/apache-iotdb-nightly-performance-report/benchmark_log_parser/example_log.txt
-
 #          python3 add_path.py add_python_path
 #          python3 add_path.py print_python_path
 #          python3 ${{ steps.pwd.outputs.pwd }}/iotdb-benchmark/iotdb-0.12/target/iotdb-0.12-0.0.1/benchmark-log.txt
