@@ -60,8 +60,18 @@ jobs:
         id: run-iotdb
         run: |
           sudo apt-get install tree -y
+          echo -----
+          echo pwd
+          pwd
+          echo -----
+          echo tree
           tree -d
-          ls -l */*/*
+          echo ----- 
+          echo 'steps.pwd.outputs.pwd'
+          pwd=`pwd`
+          cd ${{ steps.pwd.outputs.pwd }}
+          pwd
+          cd $pwd
           cd ${{ steps.pwd.outputs.pwd }}/iotdb/distribution/target/apache-iotdb-0.12.5-SNAPSHOT-all-bin/apache-iotdb-0.12.5-SNAPSHOT-all-bin
           nohup sbin/start-server.sh >${{ steps.pwd.outputs.pwd }}/iotdb/iotdb-log.txt 2>&1 &
           sleep 5
