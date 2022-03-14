@@ -259,7 +259,7 @@ jobs:
           tree -d
           echo -----
           echo ls 
-          ls -l ../*/*/*
+          ls -l ../*/*
           echo -----
           echo find ../
           echo -----
