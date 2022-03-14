@@ -13,12 +13,10 @@ def print_python_path():
 
 
 if __name__ == '__main__':
-    if len(sys.argv) != 2:
-        print('you can add only one parameter')
-        exit()
-    elif sys.argv[1] == 'add_python_path':
+    if sys.argv[1] == 'add_python_path':
         add_python_path()
     elif sys.argv[1] == 'print_python_path':
         print_python_path()
     else:
+        print('you can add only one parameter')
         exit()
