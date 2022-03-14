@@ -7,7 +7,8 @@
 
 import json
 
-from db.db import insert_db, select_db
+# from db.db import insert_db, select_db
+from ..db.db import insert_db, select_db
 
 
 def read_txt(txt_path):

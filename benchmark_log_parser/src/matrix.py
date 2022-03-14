@@ -7,7 +7,8 @@
 
 import re
 
-from lib.tools import get_new_matrix_list
+# from lib.tools import get_new_matrix_list
+from ..lib.tools import get_new_matrix_list
 
 
 def parse_matrix(data):
