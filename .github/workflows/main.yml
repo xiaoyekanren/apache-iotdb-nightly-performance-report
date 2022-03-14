@@ -244,11 +244,11 @@ jobs:
       - name: Write results to sql
         id: save-sql
         run: |
+          export PYTHONPATH=$PYTHONPATH:${{ steps.pwd.outputs.pwd }}/apache-iotdb-nightly-performance-report/benchmark_log_parser
           echo $(java -version 2>&1 |head -n 1 | cut -d ' ' -f 3 | sed 's/"//g') > ${{ steps.pwd.outputs.pwd }}/_java_version
           echo $(python3 -V) > ${{ steps.pwd.outputs.pwd }}/_python3_version
 
           cd ${{ steps.pwd.outputs.pwd }}/apache-iotdb-nightly-performance-report/benchmark_log_parser/bin
-          python3 add_path.py add_python_path
-          echo -----
-          python3 add_path.py print_python_path
+#          python3 add_path.py add_python_path
+#          python3 add_path.py print_python_path
           python3 run.py ${{ steps.pwd.outputs.pwd }}/apache-iotdb-nightly-performance-report/benchmark_log_parser/example_log.txt
