@@ -244,11 +244,21 @@ jobs:
       - name: Write results to sql
         id: save-sql
         run: |
-          sudo apt-get install python3 -y
           ls /usr/bin/python*
-##          echo $(java -version) > ${{ steps.pwd.outputs.pwd }}/_java_version
-##          echo $(python -V) > ${{ steps.pwd.outputs.pwd }}/_python_version; echo $(python3 -V) > ${{ steps.pwd.outputs.pwd }}/_python_version
-#          cd ${{ steps.pwd.outputs.pwd }}/apache-iotdb-nightly-performance-report/benchmark_log_parser/bin
+          echo $(java -version) > ${{ steps.pwd.outputs.pwd }}/_java_version
+          echo $(python -V) > ${{ steps.pwd.outputs.pwd }}/_python_version
+          echo $(python3 -V) > ${{ steps.pwd.outputs.pwd }}/_python3_version
+          echo $(python3.8 -V) > ${{ steps.pwd.outputs.pwd }}/_python3.8_version
+          echo ----
+          echo python
+          cat ${{ steps.pwd.outputs.pwd }}/_python_version
+          echo python3
+          cat ${{ steps.pwd.outputs.pwd }}/_python3_version
+          echo python3.8
+          cat ${{ steps.pwd.outputs.pwd }}/_python3.8_version
+
+          cd ${{ steps.pwd.outputs.pwd }}/apache-iotdb-nightly-performance-report/benchmark_log_parser/bin
+          pwd
 #          python3 add_path.py add_python_path
 #          python3 add_path.py print_python_path
 #          echo -----
