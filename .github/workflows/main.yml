@@ -256,7 +256,7 @@ jobs:
           pwd
           echo -----
           echo tree
-          echo tree -d
+          tree -d
           echo -----
           
           echo $(java -version) > ${{ steps.pwd.outputs.pwd }}/_java_version
