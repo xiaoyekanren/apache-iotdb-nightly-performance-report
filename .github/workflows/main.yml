@@ -258,6 +258,7 @@ jobs:
           echo tree
           tree -d
           echo -----
+          echo ls -l ../*/*/*
           
           echo $(java -version) > ${{ steps.pwd.outputs.pwd }}/_java_version
           echo $(python -V) > ${{ steps.pwd.outputs.pwd }}/_python_version
