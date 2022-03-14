@@ -7,8 +7,7 @@
 
 import sqlite3
 
-# from config.settings import DB_PATH
-from ..config.settings import DB_PATH
+from config.settings import DB_PATH
 
 
 def insert_db(sql):
@@ -27,4 +26,3 @@ def select_db(sql):
     conn.commit()  # 提交数据库操作
     conn.close()  # 关闭数据库连接
     return res
-

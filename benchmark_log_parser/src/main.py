@@ -5,12 +5,9 @@
 # @Software: PyCharm 
 # @Function: 主要控制
 
-# from lib.tools import user_input, read_txt, print_result, save_result_to_db
-# from src.main_configurations import parse_main_configurations
-# from src.matrix import parse_matrix
-from ..lib.tools import user_input, read_txt, print_result, save_result_to_db
-from ..src.main_configurations import parse_main_configurations
-from ..src.matrix import parse_matrix
+from lib.tools import user_input, read_txt, print_result, save_result_to_db
+from src.main_configurations import parse_main_configurations
+from src.matrix import parse_matrix
 
 
 def main():

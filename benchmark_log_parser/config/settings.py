@@ -6,4 +6,4 @@
 # @Function: 配置信息
 
 
-DB_PATH = "/Users/steve/Desktop/benchmark_2.db"
+DB_PATH = "/Users/zhangzhengming/Desktop/Src/apache-iotdb-nightly-performance-report/benchmark_log_parser/benchmark.db"
