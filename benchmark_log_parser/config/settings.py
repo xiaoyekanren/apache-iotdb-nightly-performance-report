@@ -7,4 +7,4 @@
 
 
 # DB_PATH = "benchmark.db" # Open when debugging
-DB_PATH = "/home/runner/work/apache-iotdb-nightly-performance-report/benchmark_log_parser/benchmark.db"
+DB_PATH = "/home/runner/work/apache-iotdb-nightly-performance-report/apache-iotdb-nightly-performance-report/apache-iotdb-nightly-performance-report/benchmark_log_parser/benchmark.db"
