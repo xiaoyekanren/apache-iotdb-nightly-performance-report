@@ -10,9 +10,9 @@ from src.main_configurations import parse_main_configurations
 from src.matrix import parse_matrix
 
 
-def main():
+def main(user_argv):
     # 1.用户输入文本地址
-    txt_path = user_input()
+    txt_path = user_argv
     # 2.读取文件内容
     data = read_txt(txt_path)
     # 3. 解析Main Configurations内容
