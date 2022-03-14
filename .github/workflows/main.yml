@@ -244,7 +244,7 @@ jobs:
       - name: Write results to sql
         id: save-sql
         run: |
-          echo $(java -version 2>&1 |head -n 1 | cut -d ' ' -f 3 | sed 's/"//g' > abc) > ${{ steps.pwd.outputs.pwd }}/_java_version
+          echo $(java -version 2>&1 |head -n 1 | cut -d ' ' -f 3 | sed 's/"//g') > ${{ steps.pwd.outputs.pwd }}/_java_version
           echo $(python3 -V) > ${{ steps.pwd.outputs.pwd }}/_python3_version
           echo python3
           cat ${{ steps.pwd.outputs.pwd }}/_python3_version
