@@ -50,6 +50,7 @@ jobs:
 #        run: |
 #          cd ${{ steps.pwd.outputs.pwd }}/iotdb
 #          echo "::set-output name=commit::$(git rev-parse --short HEAD)"
+#          echo "::set-output name=branch::$(git branch |grep ^*|cut -d ' ' -f 2)"
 #
 #      - name: Build Apache IoTDB binaries
 #        run: |
@@ -245,9 +246,14 @@ jobs:
         id: save-sql
         env:
           PYTHONPATH: $PYTHONPATH:${{ steps.pwd.outputs.pwd }}/apache-iotdb-nightly-performance-report/benchmark_log_parser
+          PROGRAM_HOME: ${{ steps.pwd.outputs.pwd }}/apache-iotdb-nightly-performance-report/benchmark_log_parser
         run: |
-          echo $(java -version 2>&1 |head -n 1 | cut -d ' ' -f 3 | sed 's/"//g') > ${{ steps.pwd.outputs.pwd }}/_java_version
-          echo $(python3 -V) > ${{ steps.pwd.outputs.pwd }}/_python3_version
+          echo $(java -version 2>&1 |head -n 1 | cut -d ' ' -f 3 | sed 's/"//g') > $PROGRAM_HOME/_java_version
+          echo ${{ steps.datetime-information.outputs.timestamp }} > $PROGRAM_HOME/_datetime_timestamp
+          echo ${{ steps.datetime-information.outputs.date }} > $PROGRAM_HOME/_datetime_date
+          echo ${{ steps.iotdb-information.outputs.commit }} > $PROGRAM_HOME/_iotdb_commit
+          echo ${{ steps.iotdb-information.outputs.branch }} > $PROGRAM_HOME/_iotdb_branch
+          echo ${{ steps.benchmark-information.outputs.commit }} > $PROGRAM_HOME/_benchmark_commit
 
-          cd ${{ steps.pwd.outputs.pwd }}/apache-iotdb-nightly-performance-report/benchmark_log_parser/bin
-          python3 run.py ${{ steps.pwd.outputs.pwd }}/apache-iotdb-nightly-performance-report/benchmark_log_parser/example_log.txt
+          cd $PROGRAM_HOME
+          python3 bin/run.py ${{ steps.pwd.outputs.pwd }}/iotdb-benchmark/iotdb-0.12/target/iotdb-0.12-0.0.1/benchmark-log.txt
