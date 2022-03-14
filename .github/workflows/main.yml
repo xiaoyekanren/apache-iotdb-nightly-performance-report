@@ -233,7 +233,6 @@ jobs:
 #          asset_name: iotdb-benchmark-0.12-${{ steps.datetime-information.outputs.date }}-${{ steps.benchmark-information.outputs.commit }}-java-${{ matrix.java }}.config.properties
 #          asset_content_type: text/plain
 
-
       - name: Checkout apache-iotdb-nightly-performance-report
         uses: actions/checkout@v2
         with:
@@ -245,8 +244,8 @@ jobs:
       - name: Write results to sql
         id: save-sql
         run: |
+          apt-get install python3 -y
           ls /usr/bin/python*
-##          apt-get install python3 -y
 ##          echo $(java -version) > ${{ steps.pwd.outputs.pwd }}/_java_version
 ##          echo $(python -V) > ${{ steps.pwd.outputs.pwd }}/_python_version; echo $(python3 -V) > ${{ steps.pwd.outputs.pwd }}/_python_version
 #          cd ${{ steps.pwd.outputs.pwd }}/apache-iotdb-nightly-performance-report/benchmark_log_parser/bin
