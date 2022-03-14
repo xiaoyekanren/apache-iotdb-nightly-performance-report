@@ -247,7 +247,7 @@ jobs:
           echo $(java -version) > ${{ steps.pwd.outputs.pwd }}/_java_version
           echo $(python3 -V) > ${{ steps.pwd.outputs.pwd }}/_python_version
           
-          cd ${{ steps.pwd.outputs.pwd }}/apache-iotdb-nightly-performance-report/benchmark_log_parser/bin
+          cd ${{ steps.pwd.outputs.pwd }}/benchmark_log_parser/bin
           git status
           git branch
           python3 add_path.py add_python_path
