@@ -70,7 +70,7 @@ def save_result_to_db(main_configurations_json, matrix_json):
     key_name = ','.join(list(main_configurations_json.keys()))
     value_name = "','".join(list(main_configurations_json.values()))
     # main_configurations_sql = "INSERT INTO LOG({}) VALUES ({})".format(key_name, "'" + value_name + "'")
-    main_configurations_sql = f"INSERT INTO LOG({key_name},_JAVA_VERSION,_TEST_BEGINNING_TIME,_BENCHMARK_COMMIT_ID,_IOTDB_COMMIT_ID,_IOTDB_BRANCH) VALUES ('{value_name},{java_version},{datetime_timestamp},{benchmark_commit}),{iotdb_commit},{iotdb_branch}')"
+    main_configurations_sql = f"INSERT INTO LOG({key_name},_JAVA_VERSION,_TEST_BEGINNING_TIME,_BENCHMARK_COMMIT_ID,_IOTDB_COMMIT_ID,_IOTDB_BRANCH) VALUES ('{value_name},'{java_version}','{datetime_timestamp}','{benchmark_commit}','{iotdb_commit}','{iotdb_branch}'')"
     print('------------------------break start------------------------')
     print(main_configurations_sql)
     print('------------------------break middle------------------------')
