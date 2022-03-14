@@ -60,12 +60,12 @@ def save_result_to_db(main_configurations_json, matrix_json):
     :param matrix_json:
     :return:
     """
-    java_version = read_txt('_java_version')
-    datetime_timestamp = read_txt('_datetime_timestamp')
-    datetime_date = read_txt('_datetime_date')
-    iotdb_commit = read_txt('_iotdb_commit')
-    benchmark_commit = read_txt('_benchmark_commit')
-    iotdb_branch = read_txt('_iotdb_branch')
+    java_version = read_txt('_java_version').replace('\n', '')
+    datetime_timestamp = read_txt('_datetime_timestamp').replace('\n', '')
+    datetime_date = read_txt('_datetime_date').replace('\n', '')
+    iotdb_commit = read_txt('_iotdb_commit').replace('\n', '')
+    benchmark_commit = read_txt('_benchmark_commit').replace('\n', '')
+    iotdb_branch = read_txt('_iotdb_branch').replace('\n', '')
 
     key_name = ','.join(list(main_configurations_json.keys()))
     value_name = "','".join(list(main_configurations_json.values()))
@@ -73,8 +73,9 @@ def save_result_to_db(main_configurations_json, matrix_json):
     main_configurations_sql = f"INSERT INTO LOG({key_name},_JAVA_VERSION,_TEST_BEGINNING_TIME,_BENCHMARK_COMMIT_ID,_IOTDB_COMMIT_ID,_IOTDB_BRANCH) VALUES ('{value_name},{java_version},{datetime_timestamp},{benchmark_commit}),{iotdb_commit},{iotdb_branch}')"
     print('------------------------break start------------------------')
     print(main_configurations_sql)
-    print('------------------------break over------------------------')
+    print('------------------------break middle------------------------')
     insert_db(main_configurations_sql)
+    print('------------------------break over------------------------')
     select_id_sql = 'SELECT MAX(LOGID) FROM LOG'
     logid = select_db(select_id_sql)[0]
 
