@@ -233,15 +233,14 @@ jobs:
 #          asset_name: iotdb-benchmark-0.12-${{ steps.datetime-information.outputs.date }}-${{ steps.benchmark-information.outputs.commit }}-java-${{ matrix.java }}.config.properties
 #          asset_content_type: text/plain
 
-# <!--
-#      - name: Checkout apache-iotdb-nightly-performance-report
-#        uses: actions/checkout@v2
-#        with:
-#          path: iotdb-benchmark
-#          repository: 'xiaoyekanren/apache-iotdb-nightly-performance-report'
-#          ref: master
-#          fetch-depth: 0
-#-->
+
+      - name: Checkout apache-iotdb-nightly-performance-report
+        uses: actions/checkout@v2
+        with:
+          path: apache-iotdb-nightly-performance-report
+          repository: 'xiaoyekanren/apache-iotdb-nightly-performance-report'
+          ref: add_more_para
+          fetch-depth: 0
 
       - name: Set up Python 3.9
         uses: actions/setup-python@v1
@@ -266,13 +265,11 @@ jobs:
           echo -----
           
           echo $(java -version) > ${{ steps.pwd.outputs.pwd }}/_java_version
-          echo $(cpython -V) > ${{ steps.pwd.outputs.pwd }}/_python_version
-          echo $(python -V) > ${{ steps.pwd.outputs.pwd }}/_python_version
-          echo $(python3 -V) > ${{ steps.pwd.outputs.pwd }}/_python_version
+          echo $(python -V) > ${{ steps.pwd.outputs.pwd }}/_python_version; echo $(python3 -V) > ${{ steps.pwd.outputs.pwd }}/_python_version
           
-          cd ${{ steps.pwd.outputs.pwd }}/benchmark_log_parser/bin
+          cd ${{ steps.pwd.outputs.pwd }}/apache-iotdb-nightly-performance-report/benchmark_log_parser/bin
           git status
           git branch
-          python3 add_path.py add_python_path
-          python3 add_path.py print_python_path
-          python3 ${{ steps.pwd.outputs.pwd }}/iotdb-benchmark/iotdb-0.12/target/iotdb-0.12-0.0.1/benchmark-log.txt
+#          python3 add_path.py add_python_path
+#          python3 add_path.py print_python_path
+#          python3 ${{ steps.pwd.outputs.pwd }}/iotdb-benchmark/iotdb-0.12/target/iotdb-0.12-0.0.1/benchmark-log.txt
