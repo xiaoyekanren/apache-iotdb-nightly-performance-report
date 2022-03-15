@@ -88,7 +88,7 @@ jobs:
         id: performance-test
         env:
           benchmark_bin_home: ${{ steps.pwd.outputs.pwd }}/iotdb-benchmark/iotdb-0.12/target/iotdb-0.12-0.0.1
-          bm_log_file: ${benchmark_bin_home}/benchmark-log.txt
+          bm_log_file: ${{ steps.pwd.outputs.pwd }}/iotdb-benchmark/iotdb-0.12/target/iotdb-0.12-0.0.1/benchmark-log.txt
         run: |
           echo modify benchmark config...
           modi_benchmark_config() {
