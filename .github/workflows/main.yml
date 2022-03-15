@@ -257,16 +257,20 @@ jobs:
 
           cd $PROGRAM_HOME
           python3 bin/run.py ${{ steps.pwd.outputs.pwd }}/iotdb-benchmark/iotdb-0.12/target/iotdb-0.12-0.0.1/benchmark-log.txt
-          
-      - name: Upload result db
+
+      - name: Add git config to apache-iotdb-nightly-performance-report
         env:
-          PROGRAM_HOME: ${{ steps.pwd.outputs.pwd }}/apache-iotdb-nightly-performance-report/benchmark_log_parser
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PROGRAM_HOME: ${{ steps.pwd.outputs.pwd }}/apache-iotdb-nightly-performance-report
         run: |
+          cd $PROGRAM_HOME
           git config --local user.email "876670773+github-actions[bot]@qq.com"
           git config --local user.name "github-actions[bot]"
-          git commit -m "Add changes" -a
-          cd ${{ steps.pwd.outputs.pwd }}/apache-iotdb-nightly-performance-report/benchmark_log_parser
-          git add benchmark.db
+          git add benchmark_log_parser/benchmark.db
           git commit -m "Nightly Performance Test Results Upload UTC+0 ${{ steps.datetime-information.outputs.date }}"
-          git push -u origin ${{ steps.iotdb-nightly-performance-report-information.outputs.branch }}
+
+      - name: Push db to apache-iotdb-nightly-performance-report
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: auto_upload_db
+          directory: ${{ steps.pwd.outputs.pwd }}/apache-iotdb-nightly-performance-report
