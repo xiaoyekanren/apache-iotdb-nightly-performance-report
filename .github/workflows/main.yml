@@ -238,7 +238,7 @@ jobs:
         uses: actions/checkout@v2
         with:
           path: apache-iotdb-nightly-performance-report
-          repository: 'xiaoyekanren/apache-iotdb-nightly-performance-report'
+          repository: 'SteveYurongSu/apache-iotdb-nightly-performance-report'
           ref: add_more_para
           fetch-depth: 0
 
