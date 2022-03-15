@@ -50,6 +50,7 @@ jobs:
         run: |
           cd ${{ steps.pwd.outputs.pwd }}/iotdb
           echo "::set-output name=commit::$(git rev-parse --short HEAD)"
+          echo "::set-output name=branch::$(git branch |grep ^*|cut -d ' ' -f 2)"
 
       - name: Build Apache IoTDB binaries
         run: |
@@ -59,7 +60,11 @@ jobs:
       - name: Run IoTDB
         id: run-iotdb
         run: |
-          cd ${{ steps.pwd.outputs.pwd }}/iotdb/distribution/target/apache-iotdb-0.12.5-SNAPSHOT-all-bin/apache-iotdb-0.12.5-SNAPSHOT-all-bin
+          echo -----
+          echo $(java -version) > ${{ steps.pwd.outputs.pwd }}/_java_version
+          echo $(python3 -V) > ${{ steps.pwd.outputs.pwd }}/_python_version
+          echo -----
+          cd ${{ steps.pwd.outputs.pwd }}/iotdb/distribution/target/apache-iotdb-0.12.6-SNAPSHOT-all-bin/apache-iotdb-0.12.6-SNAPSHOT-all-bin
           nohup sbin/start-server.sh >${{ steps.pwd.outputs.pwd }}/iotdb/iotdb-log.txt 2>&1 &
           sleep 5
           echo "::set-output name=iotdb-pid::$(jps -l | grep 'org.apache.iotdb.db.service.IoTDB' | awk '{print $1}')"
@@ -139,54 +144,54 @@ jobs:
           draft: false
           prerelease: false
 
-      - name: Upload apache-iotdb-0.12.5-SNAPSHOT-all-bin.zip
+      - name: Upload apache-iotdb-0.12.6-SNAPSHOT-all-bin.zip
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ${{ steps.pwd.outputs.pwd }}/iotdb/distribution/target/apache-iotdb-0.12.5-SNAPSHOT-all-bin.zip
-          asset_name: apache-iotdb-0.12.5-SNAPSHOT-all-bin-nightly-${{ steps.datetime-information.outputs.date }}-${{ steps.iotdb-information.outputs.commit }}-java-${{ matrix.java }}.zip
+          asset_path: ${{ steps.pwd.outputs.pwd }}/iotdb/distribution/target/apache-iotdb-0.12.6-SNAPSHOT-all-bin.zip
+          asset_name: apache-iotdb-0.12.6-SNAPSHOT-all-bin-nightly-${{ steps.datetime-information.outputs.date }}-${{ steps.iotdb-information.outputs.commit }}-java-${{ matrix.java }}.zip
           asset_content_type: application/zip
 
-      - name: Upload apache-iotdb-0.12.5-SNAPSHOT-cli-bin.zip
+      - name: Upload apache-iotdb-0.12.6-SNAPSHOT-cli-bin.zip
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ${{ steps.pwd.outputs.pwd }}/iotdb/distribution/target/apache-iotdb-0.12.5-SNAPSHOT-cli-bin.zip
-          asset_name: apache-iotdb-0.12.5-SNAPSHOT-cli-bin-nightly-${{ steps.datetime-information.outputs.date }}-${{ steps.iotdb-information.outputs.commit }}-java-${{ matrix.java }}.zip
+          asset_path: ${{ steps.pwd.outputs.pwd }}/iotdb/distribution/target/apache-iotdb-0.12.6-SNAPSHOT-cli-bin.zip
+          asset_name: apache-iotdb-0.12.6-SNAPSHOT-cli-bin-nightly-${{ steps.datetime-information.outputs.date }}-${{ steps.iotdb-information.outputs.commit }}-java-${{ matrix.java }}.zip
           asset_content_type: application/zip
 
-      - name: Upload apache-iotdb-0.12.5-SNAPSHOT-cluster-bin.zip
+      - name: Upload apache-iotdb-0.12.6-SNAPSHOT-cluster-bin.zip
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ${{ steps.pwd.outputs.pwd }}/iotdb/distribution/target/apache-iotdb-0.12.5-SNAPSHOT-cluster-bin.zip
-          asset_name: apache-iotdb-0.12.5-SNAPSHOT-cluster-bin-nightly-${{ steps.datetime-information.outputs.date }}-${{ steps.iotdb-information.outputs.commit }}-java-${{ matrix.java }}.zip
+          asset_path: ${{ steps.pwd.outputs.pwd }}/iotdb/distribution/target/apache-iotdb-0.12.6-SNAPSHOT-cluster-bin.zip
+          asset_name: apache-iotdb-0.12.6-SNAPSHOT-cluster-bin-nightly-${{ steps.datetime-information.outputs.date }}-${{ steps.iotdb-information.outputs.commit }}-java-${{ matrix.java }}.zip
           asset_content_type: application/zip
 
-      - name: Upload apache-iotdb-0.12.5-SNAPSHOT-grafana-bin.zip
+      - name: Upload apache-iotdb-0.12.6-SNAPSHOT-grafana-bin.zip
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ${{ steps.pwd.outputs.pwd }}/iotdb/distribution/target/apache-iotdb-0.12.5-SNAPSHOT-grafana-bin.zip
-          asset_name: apache-iotdb-0.12.5-SNAPSHOT-grafana-bin-nightly-${{ steps.datetime-information.outputs.date }}-${{ steps.iotdb-information.outputs.commit }}-java-${{ matrix.java }}.zip
+          asset_path: ${{ steps.pwd.outputs.pwd }}/iotdb/distribution/target/apache-iotdb-0.12.6-SNAPSHOT-grafana-bin.zip
+          asset_name: apache-iotdb-0.12.6-SNAPSHOT-grafana-bin-nightly-${{ steps.datetime-information.outputs.date }}-${{ steps.iotdb-information.outputs.commit }}-java-${{ matrix.java }}.zip
           asset_content_type: application/zip
 
-      - name: Upload apache-iotdb-0.12.5-SNAPSHOT-server-bin.zip
+      - name: Upload apache-iotdb-0.12.6-SNAPSHOT-server-bin.zip
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ${{ steps.pwd.outputs.pwd }}/iotdb/distribution/target/apache-iotdb-0.12.5-SNAPSHOT-server-bin.zip
-          asset_name: apache-iotdb-0.12.5-SNAPSHOT-server-bin-nightly-${{ steps.datetime-information.outputs.date }}-${{ steps.iotdb-information.outputs.commit }}-java-${{ matrix.java }}.zip
+          asset_path: ${{ steps.pwd.outputs.pwd }}/iotdb/distribution/target/apache-iotdb-0.12.6-SNAPSHOT-server-bin.zip
+          asset_name: apache-iotdb-0.12.6-SNAPSHOT-server-bin-nightly-${{ steps.datetime-information.outputs.date }}-${{ steps.iotdb-information.outputs.commit }}-java-${{ matrix.java }}.zip
           asset_content_type: application/zip
 
       - name: Upload iotdb log
@@ -196,7 +201,7 @@ jobs:
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: ${{ steps.pwd.outputs.pwd }}/iotdb/iotdb-log.txt
-          asset_name: apache-iotdb-0.12.5-SNAPSHOT-server-bin-nightly-${{ steps.datetime-information.outputs.date }}-${{ steps.iotdb-information.outputs.commit }}-java-${{ matrix.java }}.log.txt
+          asset_name: apache-iotdb-0.12.6-SNAPSHOT-server-bin-nightly-${{ steps.datetime-information.outputs.date }}-${{ steps.iotdb-information.outputs.commit }}-java-${{ matrix.java }}.log.txt
           asset_content_type: text/plain
 
       - name: Upload iotdb-benchmark binary
@@ -228,3 +233,27 @@ jobs:
           asset_path: ${{ steps.pwd.outputs.pwd }}/iotdb-benchmark/iotdb-0.12/target/iotdb-0.12-0.0.1/conf/config.properties
           asset_name: iotdb-benchmark-0.12-${{ steps.datetime-information.outputs.date }}-${{ steps.benchmark-information.outputs.commit }}-java-${{ matrix.java }}.config.properties
           asset_content_type: text/plain
+
+      - name: Checkout apache-iotdb-nightly-performance-report
+        uses: actions/checkout@v2
+        with:
+          path: apache-iotdb-nightly-performance-report
+          repository: 'SteveYurongSu/apache-iotdb-nightly-performance-report'
+          ref: add_more_para
+          fetch-depth: 0
+
+      - name: Write results to sql
+        id: save-sql
+        env:
+          PYTHONPATH: $PYTHONPATH:${{ steps.pwd.outputs.pwd }}/apache-iotdb-nightly-performance-report/benchmark_log_parser
+          PROGRAM_HOME: ${{ steps.pwd.outputs.pwd }}/apache-iotdb-nightly-performance-report/benchmark_log_parser
+        run: |
+          echo $(java -version 2>&1 |head -n 1 | cut -d ' ' -f 3 | sed 's/"//g') > $PROGRAM_HOME/_java_version
+          echo ${{ steps.datetime-information.outputs.timestamp }} > $PROGRAM_HOME/_datetime_timestamp
+          echo ${{ steps.datetime-information.outputs.date }} > $PROGRAM_HOME/_datetime_date
+          echo ${{ steps.iotdb-information.outputs.commit }} > $PROGRAM_HOME/_iotdb_commit
+          echo ${{ steps.iotdb-information.outputs.branch }} > $PROGRAM_HOME/_iotdb_branch
+          echo ${{ steps.benchmark-information.outputs.commit }} > $PROGRAM_HOME/_benchmark_commit
+
+          cd $PROGRAM_HOME
+          python3 bin/run.py ${{ steps.pwd.outputs.pwd }}/iotdb-benchmark/iotdb-0.12/target/iotdb-0.12-0.0.1/benchmark-log.txt
