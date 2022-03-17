@@ -241,7 +241,7 @@ jobs:
         uses: actions/checkout@v2
         with:
           path: db
-          repository: 'https://github.com/SteveYurongSu/apache-iotdb-nightly-performance-report'
+          repository: 'SteveYurongSu/apache-iotdb-nightly-performance-report'
           ref: db
           fetch-depth: 0
 
