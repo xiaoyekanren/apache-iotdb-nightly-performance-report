@@ -268,10 +268,8 @@ jobs:
           python3 bin/run.py ${{ steps.pwd.outputs.pwd }}/iotdb-benchmark/iotdb-0.12/target/iotdb-0.12-0.0.1/benchmark-log.txt ${{ steps.pwd.outputs.pwd }}/db/benchmark.db
 
       - name: Add git config to apache-iotdb-nightly-performance-report
-        env:
-          PROGRAM_HOME: ${{ steps.pwd.outputs.pwd }}/apache-iotdb-nightly-performance-report
         run: |
-          cd $PROGRAM_HOME
+          cd ${{ steps.pwd.outputs.pwd }}/db
           git config --local user.email "876670773+github-actions[bot]@qq.com"
           git config --local user.name "github-actions[bot]"
           git add benchmark_log_parser/benchmark.db
