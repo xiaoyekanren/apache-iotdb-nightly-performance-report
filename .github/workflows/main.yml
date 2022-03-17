@@ -244,7 +244,6 @@ jobs:
           repository: 'https://github.com/SteveYurongSu/apache-iotdb-nightly-performance-report'
           ref: db
           fetch-depth: 0
-        run: echo "::set-output name=db::${{ steps.pwd.outputs.pwd }}/db/benchmark.db"
 
       - name: Collect iotdb-nightly-performance-report information
         id: iotdb-nightly-performance-report-information
@@ -266,7 +265,7 @@ jobs:
           echo ${{ steps.benchmark-information.outputs.commit }} > $PROGRAM_HOME/_benchmark_commit
 
           cd $PROGRAM_HOME
-          python3 bin/run.py ${{ steps.pwd.outputs.pwd }}/iotdb-benchmark/iotdb-0.12/target/iotdb-0.12-0.0.1/benchmark-log.txt ${{ steps.performance-report-db.outputs.db }}
+          python3 bin/run.py ${{ steps.pwd.outputs.pwd }}/iotdb-benchmark/iotdb-0.12/target/iotdb-0.12-0.0.1/benchmark-log.txt ${{ steps.pwd.outputs.pwd }}/db/benchmark.db
 
       - name: Add git config to apache-iotdb-nightly-performance-report
         env:
