@@ -272,7 +272,7 @@ jobs:
           cd ${{ steps.pwd.outputs.pwd }}/db
           git config --local user.email "876670773+github-actions[bot]@qq.com"
           git config --local user.name "github-actions[bot]"
-          git add benchmark_log_parser/benchmark.db
+          git add benchmark.db
           git commit -m "Nightly Performance Test Results Upload UTC+0 ${{ steps.datetime-information.outputs.date }}"
 
       - name: Push db to apache-iotdb-nightly-performance-report
