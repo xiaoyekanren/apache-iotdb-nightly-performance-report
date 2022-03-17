@@ -88,28 +88,22 @@ jobs:
         id: performance-test
         env:
           benchmark_bin_home: ${{ steps.pwd.outputs.pwd }}/iotdb-benchmark/iotdb-0.12/target/iotdb-0.12-0.0.1
-          bm_log_file: ${{ steps.pwd.outputs.pwd }}/iotdb-benchmark/iotdb-0.12/target/iotdb-0.12-0.0.1/benchmark-log.txt
+          benchmark_conf: ${{ steps.pwd.outputs.pwd }}/iotdb-benchmark/iotdb-0.12/target/iotdb-0.12-0.0.1/conf/config.properties
         run: |
+          echo "::set-output name=benchmark-pid::$(jps -l | grep 'cn.edu.tsinghua.iotdb.benchmark.App' | awk '{print $1}')"
+          echo "::set-output name=benchmark-log::${{ steps.pwd.outputs.pwd }}/iotdb-benchmark/iotdb-0.12/target/iotdb-0.12-0.0.1/benchmark-log.txt"
+          
           echo modify benchmark config...
-          modi_benchmark_config() {
-              benchmark_conf=${benchmark_bin_home}/conf/config.properties
-              sed -i 's/^LOOP.*/LOOP=100000/g' ${benchmark_conf}
-          }
-          modi_benchmark_config
+          sed -i 's/^LOOP.*/LOOP=100000/g' ${benchmark_conf}
 
           echo start benchmarking...
-          start_benchmark() {
-              cd ${benchmark_bin_home}
-              nohup ./benchmark.sh >${bm_log_file} &
-              sleep .5
-              echo "::set-output name=benchmark-pid::$(jps -l | grep 'cn.edu.tsinghua.iotdb.benchmark.App' | awk '{print $1}')"
-          }
-          start_benchmark
+          cd ${benchmark_bin_home}
+          nohup ./benchmark.sh >${{ steps.performance-test.outputs.benchmark-log }} & ; sleep .5
 
           echo listening pid...
           while true; do
               if test $(jps -l | grep 'cn.edu.tsinghua.iotdb.benchmark.App' | awk '{print $1}'); then
-                  tail -n 1 ${bm_log_file}
+                  tail -n 1 ${{ steps.performance-test.outputs.benchmark-log }}
                   sleep 1
               else
                   echo done!
@@ -214,7 +208,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ${{ steps.pwd.outputs.pwd }}/iotdb-benchmark/iotdb-0.12/target/iotdb-0.12-0.0.1/benchmark-log.txt
+          asset_path: ${{ steps.performance-test.outputs.benchmark-log }}
           asset_name: iotdb-benchmark-0.12-${{ steps.datetime-information.outputs.date }}-${{ steps.benchmark-information.outputs.commit }}-java-${{ matrix.java }}.log.txt
           asset_content_type: text/plain
 
@@ -265,7 +259,7 @@ jobs:
           echo ${{ steps.benchmark-information.outputs.commit }} > $PROGRAM_HOME/_benchmark_commit
 
           cd $PROGRAM_HOME
-          python3 bin/run.py ${{ steps.pwd.outputs.pwd }}/iotdb-benchmark/iotdb-0.12/target/iotdb-0.12-0.0.1/benchmark-log.txt ${{ steps.pwd.outputs.pwd }}/db/benchmark.db
+          python3 bin/run.py ${{ steps.performance-test.outputs.benchmark-log }} ${{ steps.pwd.outputs.pwd }}/db/benchmark.db
 
       - name: Add git config to apache-iotdb-nightly-performance-report
         run: |
