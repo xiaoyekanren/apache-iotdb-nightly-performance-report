@@ -253,7 +253,7 @@ jobs:
           echo ${{ steps.benchmark-information.outputs.commit }} > $PROGRAM_HOME/_benchmark_commit
 
           cd $PROGRAM_HOME
-#          python3 bin/run.py ${{ steps.pwd.outputs.pwd }}/iotdb-benchmark/iotdb-0.12/target/iotdb-0.12-0.0.1/benchmark-log.txt ${{ steps.pwd.outputs.pwd }}/db/benchmark.db
+          echo python3 bin/run.py ${{ steps.pwd.outputs.pwd }}/iotdb-benchmark/iotdb-0.12/target/iotdb-0.12-0.0.1/benchmark-log.txt ${{ steps.pwd.outputs.pwd }}/db/benchmark.db
           python3 bin/run.py ${{ steps.pwd.outputs.pwd }}/apache-iotdb-nightly-performance-report/benchmark_log_parser/example_log.txt ${{ steps.pwd.outputs.pwd }}/db/benchmark.db
 
       - name: ready to upload db
