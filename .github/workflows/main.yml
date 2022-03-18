@@ -223,7 +223,7 @@ jobs:
           asset_name: iotdb-benchmark-0.12-${{ steps.datetime-information.outputs.date }}-${{ steps.benchmark-information.outputs.commit }}-java-${{ matrix.java }}.config.properties
           asset_content_type: text/plain
 
-      - name: Checkout apache-iotdb-nightly-performance-report
+      - name: Checkout performance-test grogram
         uses: actions/checkout@v2
         with:
           path: apache-iotdb-nightly-performance-report
@@ -231,7 +231,7 @@ jobs:
           ref: auto_upload_db
           fetch-depth: 0
 
-      - name: Checkout db
+      - name: Checkout db for results
         id: performance-report-db
         uses: actions/checkout@v2
         with:
@@ -239,12 +239,6 @@ jobs:
           repository: 'SteveYurongSu/apache-iotdb-nightly-performance-report'
           ref: db
           fetch-depth: 0
-
-      - name: Collect iotdb-nightly-performance-report information
-        id: iotdb-nightly-performance-report-information
-        run: |
-          cd ${{ steps.pwd.outputs.pwd }}/apache-iotdb-nightly-performance-report
-          echo "::set-output name=branch::$(git branch |grep ^*|cut -d ' ' -f 2)"
 
       - name: Write results to sql
         id: save-sql
@@ -261,8 +255,9 @@ jobs:
 
           cd $PROGRAM_HOME
           python3 bin/run.py ${{ steps.pwd.outputs.pwd }}/iotdb-benchmark/iotdb-0.12/target/iotdb-0.12-0.0.1/benchmark-log.txt ${{ steps.pwd.outputs.pwd }}/db/benchmark.db
+          echo python3 bin/run.py ${{ steps.pwd.outputs.pwd }}/iotdb-benchmark/iotdb-0.12/target/iotdb-0.12-0.0.1/benchmark-log.txt ${{ steps.pwd.outputs.pwd }}/db/benchmark.db
 
-      - name: Add git config to apache-iotdb-nightly-performance-report
+      - name: ready to upload db
         run: |
           cd ${{ steps.pwd.outputs.pwd }}/db
           git config --local user.email "876670773+github-actions[bot]@qq.com"
@@ -270,7 +265,7 @@ jobs:
           git add benchmark.db
           git commit -m "Nightly Performance Test Results Upload UTC+0 ${{ steps.datetime-information.outputs.date }}"
 
-      - name: Push db to apache-iotdb-nightly-performance-report
+      - name: Push db to db-branch
         uses: ad-m/github-push-action@master
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}

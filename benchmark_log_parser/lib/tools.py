@@ -74,7 +74,7 @@ def save_result_to_db(main_configurations_json, matrix_json, db_path):
     main_configurations_sql = f"INSERT INTO LOG({key_name},_JAVA_VERSION,_TEST_BEGINNING_TIME,_BENCHMARK_COMMIT_ID,_IOTDB_COMMIT_ID,_IOTDB_BRANCH) VALUES ('{value_name}','{java_version}','{datetime_timestamp}','{benchmark_commit}','{iotdb_commit}','{iotdb_branch}')"
     insert_db(main_configurations_sql, db_path)
     select_id_sql = 'SELECT MAX(LOGID) FROM LOG'
-    logid = select_db(select_id_sql)[0]
+    logid = select_db(select_id_sql, db_path)[0]
 
     for table_name in matrix_json.keys():
         value_list = matrix_json[table_name]
