@@ -16,7 +16,7 @@ jobs:
     strategy:
       max-parallel: 20
       matrix:
-        java: 11
+        java: [ 11 ]
         os: [ ubuntu-latest ]
 
     runs-on: ${{ matrix.os }}
