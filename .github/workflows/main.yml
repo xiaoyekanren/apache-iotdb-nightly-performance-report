@@ -244,6 +244,7 @@ jobs:
         env:
           PYTHONPATH: $PYTHONPATH:${{ steps.pwd.outputs.pwd }}/apache-iotdb-nightly-performance-report/benchmark_log_parser
           PROGRAM_HOME: ${{ steps.pwd.outputs.pwd }}/apache-iotdb-nightly-performance-report/benchmark_log_parser
+#          bm_log_file: ${{ steps.pwd.outputs.pwd }}/iotdb-benchmark/iotdb-0.12/target/iotdb-0.12-0.0.1/benchmark-log.txt
         run: |
           echo $(java -version 2>&1 |head -n 1 | cut -d ' ' -f 3 | sed 's/"//g') > $PROGRAM_HOME/_java_version
           echo ${{ steps.datetime-information.outputs.timestamp }} > $PROGRAM_HOME/_datetime_timestamp
@@ -253,10 +254,10 @@ jobs:
           echo ${{ steps.benchmark-information.outputs.commit }} > $PROGRAM_HOME/_benchmark_commit
 
           cd $PROGRAM_HOME
-          echo python3 bin/run.py ${{ steps.pwd.outputs.pwd }}/iotdb-benchmark/iotdb-0.12/target/iotdb-0.12-0.0.1/benchmark-log.txt ${{ steps.pwd.outputs.pwd }}/db/benchmark.db
+#          python3 bin/run.py $bm_log_file ${{ steps.pwd.outputs.pwd }}/db/benchmark.db
           python3 bin/run.py ${{ steps.pwd.outputs.pwd }}/apache-iotdb-nightly-performance-report/benchmark_log_parser/example_log.txt ${{ steps.pwd.outputs.pwd }}/db/benchmark.db
 
-      - name: ready to upload db
+      - name: upload db
         env:
           github_token: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -271,9 +272,3 @@ jobs:
           echo ----------
           git push -u origin db
 
-#      - name: Push db to db-branch
-#        uses: ad-m/github-push-action@master
-#        with:
-#          github_token: ${{ secrets.GITHUB_TOKEN }}
-#          branch: db
-#          directory: ${{ steps.pwd.outputs.pwd }}/db
