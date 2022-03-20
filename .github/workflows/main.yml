@@ -257,7 +257,7 @@ jobs:
           python3 bin/run.py ${{ steps.pwd.outputs.pwd }}/apache-iotdb-nightly-performance-report/benchmark_log_parser/example_log.txt ${{ steps.pwd.outputs.pwd }}/db/benchmark.db
 
       - name: ready to upload db
-        with:
+        env:
           github_token: ${{ secrets.GITHUB_TOKEN }}
         run: |
           cd ${{ steps.pwd.outputs.pwd }}/db
