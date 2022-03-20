@@ -148,7 +148,7 @@ jobs:
           echo ${{ steps.benchmark-information.outputs.commit }} > $PROGRAM_HOME/_benchmark_commit
 
           cd $PROGRAM_HOME
-          python3 bin/run.py $BM_LOG_FILE_EXAMPLE $DB_FILE
+          python3 bin/run.py $BM_LOG_FILE $DB_FILE
 
           echo "::set-output name=cur_throught::$(python3 src/contrast.py 'cur_throught' ${{ steps.pwd.outputs.pwd }}/db/benchmark.db)"
           echo "::set-output name=cur_avg::$(python3 src/contrast.py 'cur_avg' ${{ steps.pwd.outputs.pwd }}/db/benchmark.db)"
