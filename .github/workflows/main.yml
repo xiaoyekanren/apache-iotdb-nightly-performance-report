@@ -244,7 +244,9 @@ jobs:
         env:
           PYTHONPATH: $PYTHONPATH:${{ steps.pwd.outputs.pwd }}/apache-iotdb-nightly-performance-report/benchmark_log_parser
           PROGRAM_HOME: ${{ steps.pwd.outputs.pwd }}/apache-iotdb-nightly-performance-report/benchmark_log_parser
-#          bm_log_file: ${{ steps.pwd.outputs.pwd }}/iotdb-benchmark/iotdb-0.12/target/iotdb-0.12-0.0.1/benchmark-log.txt
+          BM_LOG_FILE: ${{ steps.pwd.outputs.pwd }}/iotdb-benchmark/iotdb-0.12/target/iotdb-0.12-0.0.1/benchmark-log.txt
+          BM_LOG_FILE_EXAMPLE: ${{ steps.pwd.outputs.pwd }}/apache-iotdb-nightly-performance-report/benchmark_log_parser/example_log.txt
+          DB_FILE: ${{ steps.pwd.outputs.pwd }}/db/benchmark.db
         run: |
           echo $(java -version 2>&1 |head -n 1 | cut -d ' ' -f 3 | sed 's/"//g') > $PROGRAM_HOME/_java_version
           echo ${{ steps.datetime-information.outputs.timestamp }} > $PROGRAM_HOME/_datetime_timestamp
@@ -254,8 +256,7 @@ jobs:
           echo ${{ steps.benchmark-information.outputs.commit }} > $PROGRAM_HOME/_benchmark_commit
 
           cd $PROGRAM_HOME
-#          python3 bin/run.py $bm_log_file ${{ steps.pwd.outputs.pwd }}/db/benchmark.db
-          python3 bin/run.py ${{ steps.pwd.outputs.pwd }}/apache-iotdb-nightly-performance-report/benchmark_log_parser/example_log.txt ${{ steps.pwd.outputs.pwd }}/db/benchmark.db
+          python3 bin/run.py $BM_LOG_FILE_EXAMPLE $DB_FILE
 
       - name: upload db
         env:
