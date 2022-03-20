@@ -32,196 +32,196 @@ jobs:
           echo "::set-output name=timestamp::$(date +%s)"
           echo "::set-output name=date::$(date +"%Y-%m-%d-%H-%M-%S")"
 
-      - name: Set up JDK ${{ matrix.java }}
-        uses: actions/setup-java@v1
-        with:
-          java-version: ${{ matrix.java }}
-
-      - name: Checkout apache/iotdb
-        uses: actions/checkout@v2
-        with:
-          path: iotdb
-          repository: 'apache/iotdb'
-          ref: rel/0.12
-          fetch-depth: 0
-
-      - name: Collect IoTDB information
-        id: iotdb-information
-        run: |
-          cd ${{ steps.pwd.outputs.pwd }}/iotdb
-          echo "::set-output name=commit::$(git rev-parse --short HEAD)"
-          echo "::set-output name=branch::$(git branch |grep ^*|cut -d ' ' -f 2)"
-
-      - name: Build Apache IoTDB binaries
-        run: |
-          cd ${{ steps.pwd.outputs.pwd }}/iotdb
-          mvn clean package -pl distribution -am -DskipTests
-
-      - name: Run IoTDB
-        id: run-iotdb
-        run: |
-          cd ${{ steps.pwd.outputs.pwd }}/iotdb/distribution/target/apache-iotdb-0.12.6-SNAPSHOT-all-bin/apache-iotdb-0.12.6-SNAPSHOT-all-bin
-          nohup sbin/start-server.sh >${{ steps.pwd.outputs.pwd }}/iotdb/iotdb-log.txt 2>&1 &
-          sleep 5
-          echo "::set-output name=iotdb-pid::$(jps -l | grep 'org.apache.iotdb.db.service.IoTDB' | awk '{print $1}')"
-
-      - name: Checkout thulab/iotdb-benchmark
-        uses: actions/checkout@v2
-        with:
-          path: iotdb-benchmark
-          repository: 'thulab/iotdb-benchmark'
-          ref: master
-          fetch-depth: 0
-
-      - name: Collect benchmark information
-        id: benchmark-information
-        run: |
-          cd ${{ steps.pwd.outputs.pwd }}/iotdb-benchmark
-          echo "::set-output name=commit::$(git rev-parse --short HEAD)"
-
-      - name: Build benchmark binaries
-        run: |
-          cd ${{ steps.pwd.outputs.pwd }}/iotdb-benchmark
-          mvn clean package -pl core,iotdb-0.12 -Dmaven.test.skip=true
-
-      - name: Do performance test
-        id: performance-test
-        env:
-          benchmark_bin_home: ${{ steps.pwd.outputs.pwd }}/iotdb-benchmark/iotdb-0.12/target/iotdb-0.12-0.0.1
-          bm_log_file: ${{ steps.pwd.outputs.pwd }}/iotdb-benchmark/iotdb-0.12/target/iotdb-0.12-0.0.1/benchmark-log.txt
-          benchmark_conf: ${{ steps.pwd.outputs.pwd }}/iotdb-benchmark/iotdb-0.12/target/iotdb-0.12-0.0.1/conf/config.properties
-        run: |
-          echo modify benchmark config...
-          sed -i 's/^LOOP.*/LOOP=100000/g' ${benchmark_conf}
-
-          echo start benchmarking...
-          cd ${benchmark_bin_home}
-          nohup ./benchmark.sh >$bm_log_file &
-          sleep .5
-
-          echo "::set-output name=benchmark-pid::$(jps -l | grep 'cn.edu.tsinghua.iotdb.benchmark.App' | awk '{print $1}')"
-
-          echo listening pid...
-          while true; do
-              if test $(jps -l | grep 'cn.edu.tsinghua.iotdb.benchmark.App' | awk '{print $1}'); then
-                  tail -n 1 ${bm_log_file}
-                  sleep 1
-              else
-                  echo done!
-                  break
-              fi
-          done
-
-          echo kill IoTDB...
-          kill -9 ${{ steps.run-iotdb.outputs.iotdb-pid }}
-
-      - name: Create release
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ steps.datetime-information.outputs.date }}-0.12-${{ steps.iotdb-information.outputs.commit }}-java-${{ matrix.java }}
-          release_name: Apache IoTDB 0.12 Nightly Performance Test Release (UTC+0 ${{ steps.datetime-information.outputs.date }}) (Java ${{ matrix.java }}) (Unofficial)
-          body: |
-            Apache IoTDB 0.12 Nightly Performance Test Release (Unofficial)
-            IoTDB Branch: [rel/0.12](https://github.com/apache/iotdb/tree/rel/0.12)
-            IoTDB commit ID: [${{ steps.iotdb-information.outputs.commit }}](https://github.com/apache/iotdb/commit/${{ steps.iotdb-information.outputs.commit }})
-            Benchmark commit ID: [${{ steps.benchmark-information.outputs.commit }}](https://github.com/thulab/iotdb-benchmark/commit/${{ steps.benchmark-information.outputs.commit }})
-            Build date: UTC+0 ${{ steps.datetime-information.outputs.date }}
-            Java version: ${{ matrix.java }}
-          draft: false
-          prerelease: false
-
-      - name: Upload apache-iotdb-0.12.6-SNAPSHOT-all-bin.zip
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ${{ steps.pwd.outputs.pwd }}/iotdb/distribution/target/apache-iotdb-0.12.6-SNAPSHOT-all-bin.zip
-          asset_name: apache-iotdb-0.12.6-SNAPSHOT-all-bin-nightly-${{ steps.datetime-information.outputs.date }}-${{ steps.iotdb-information.outputs.commit }}-java-${{ matrix.java }}.zip
-          asset_content_type: application/zip
-
-      - name: Upload apache-iotdb-0.12.6-SNAPSHOT-cli-bin.zip
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ${{ steps.pwd.outputs.pwd }}/iotdb/distribution/target/apache-iotdb-0.12.6-SNAPSHOT-cli-bin.zip
-          asset_name: apache-iotdb-0.12.6-SNAPSHOT-cli-bin-nightly-${{ steps.datetime-information.outputs.date }}-${{ steps.iotdb-information.outputs.commit }}-java-${{ matrix.java }}.zip
-          asset_content_type: application/zip
-
-      - name: Upload apache-iotdb-0.12.6-SNAPSHOT-cluster-bin.zip
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ${{ steps.pwd.outputs.pwd }}/iotdb/distribution/target/apache-iotdb-0.12.6-SNAPSHOT-cluster-bin.zip
-          asset_name: apache-iotdb-0.12.6-SNAPSHOT-cluster-bin-nightly-${{ steps.datetime-information.outputs.date }}-${{ steps.iotdb-information.outputs.commit }}-java-${{ matrix.java }}.zip
-          asset_content_type: application/zip
-
-      - name: Upload apache-iotdb-0.12.6-SNAPSHOT-grafana-bin.zip
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ${{ steps.pwd.outputs.pwd }}/iotdb/distribution/target/apache-iotdb-0.12.6-SNAPSHOT-grafana-bin.zip
-          asset_name: apache-iotdb-0.12.6-SNAPSHOT-grafana-bin-nightly-${{ steps.datetime-information.outputs.date }}-${{ steps.iotdb-information.outputs.commit }}-java-${{ matrix.java }}.zip
-          asset_content_type: application/zip
-
-      - name: Upload apache-iotdb-0.12.6-SNAPSHOT-server-bin.zip
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ${{ steps.pwd.outputs.pwd }}/iotdb/distribution/target/apache-iotdb-0.12.6-SNAPSHOT-server-bin.zip
-          asset_name: apache-iotdb-0.12.6-SNAPSHOT-server-bin-nightly-${{ steps.datetime-information.outputs.date }}-${{ steps.iotdb-information.outputs.commit }}-java-${{ matrix.java }}.zip
-          asset_content_type: application/zip
-
-      - name: Upload iotdb log
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ${{ steps.pwd.outputs.pwd }}/iotdb/iotdb-log.txt
-          asset_name: apache-iotdb-0.12.6-SNAPSHOT-server-bin-nightly-${{ steps.datetime-information.outputs.date }}-${{ steps.iotdb-information.outputs.commit }}-java-${{ matrix.java }}.log.txt
-          asset_content_type: text/plain
-
-      - name: Upload iotdb-benchmark binary
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ${{ steps.pwd.outputs.pwd }}/iotdb-benchmark/iotdb-0.12/target/iotdb-0.12-0.0.1.zip
-          asset_name: iotdb-benchmark-0.12-${{ steps.datetime-information.outputs.date }}-${{ steps.benchmark-information.outputs.commit }}-java-${{ matrix.java }}.zip
-          asset_content_type: application/zip
-
-      - name: Upload iotdb-benchmark log
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ${{ steps.pwd.outputs.pwd }}/iotdb-benchmark/iotdb-0.12/target/iotdb-0.12-0.0.1/benchmark-log.txt
-          asset_name: iotdb-benchmark-0.12-${{ steps.datetime-information.outputs.date }}-${{ steps.benchmark-information.outputs.commit }}-java-${{ matrix.java }}.log.txt
-          asset_content_type: text/plain
-
-      - name: Upload iotdb-benchmark config.properties
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ${{ steps.pwd.outputs.pwd }}/iotdb-benchmark/iotdb-0.12/target/iotdb-0.12-0.0.1/conf/config.properties
-          asset_name: iotdb-benchmark-0.12-${{ steps.datetime-information.outputs.date }}-${{ steps.benchmark-information.outputs.commit }}-java-${{ matrix.java }}.config.properties
-          asset_content_type: text/plain
+#      - name: Set up JDK ${{ matrix.java }}
+#        uses: actions/setup-java@v1
+#        with:
+#          java-version: ${{ matrix.java }}
+#
+#      - name: Checkout apache/iotdb
+#        uses: actions/checkout@v2
+#        with:
+#          path: iotdb
+#          repository: 'apache/iotdb'
+#          ref: rel/0.12
+#          fetch-depth: 0
+#
+#      - name: Collect IoTDB information
+#        id: iotdb-information
+#        run: |
+#          cd ${{ steps.pwd.outputs.pwd }}/iotdb
+#          echo "::set-output name=commit::$(git rev-parse --short HEAD)"
+#          echo "::set-output name=branch::$(git branch |grep ^*|cut -d ' ' -f 2)"
+#
+#      - name: Build Apache IoTDB binaries
+#        run: |
+#          cd ${{ steps.pwd.outputs.pwd }}/iotdb
+#          mvn clean package -pl distribution -am -DskipTests
+#
+#      - name: Run IoTDB
+#        id: run-iotdb
+#        run: |
+#          cd ${{ steps.pwd.outputs.pwd }}/iotdb/distribution/target/apache-iotdb-0.12.6-SNAPSHOT-all-bin/apache-iotdb-0.12.6-SNAPSHOT-all-bin
+#          nohup sbin/start-server.sh >${{ steps.pwd.outputs.pwd }}/iotdb/iotdb-log.txt 2>&1 &
+#          sleep 5
+#          echo "::set-output name=iotdb-pid::$(jps -l | grep 'org.apache.iotdb.db.service.IoTDB' | awk '{print $1}')"
+#
+#      - name: Checkout thulab/iotdb-benchmark
+#        uses: actions/checkout@v2
+#        with:
+#          path: iotdb-benchmark
+#          repository: 'thulab/iotdb-benchmark'
+#          ref: master
+#          fetch-depth: 0
+#
+#      - name: Collect benchmark information
+#        id: benchmark-information
+#        run: |
+#          cd ${{ steps.pwd.outputs.pwd }}/iotdb-benchmark
+#          echo "::set-output name=commit::$(git rev-parse --short HEAD)"
+#
+#      - name: Build benchmark binaries
+#        run: |
+#          cd ${{ steps.pwd.outputs.pwd }}/iotdb-benchmark
+#          mvn clean package -pl core,iotdb-0.12 -Dmaven.test.skip=true
+#
+#      - name: Do performance test
+#        id: performance-test
+#        env:
+#          benchmark_bin_home: ${{ steps.pwd.outputs.pwd }}/iotdb-benchmark/iotdb-0.12/target/iotdb-0.12-0.0.1
+#          bm_log_file: ${{ steps.pwd.outputs.pwd }}/iotdb-benchmark/iotdb-0.12/target/iotdb-0.12-0.0.1/benchmark-log.txt
+#          benchmark_conf: ${{ steps.pwd.outputs.pwd }}/iotdb-benchmark/iotdb-0.12/target/iotdb-0.12-0.0.1/conf/config.properties
+#        run: |
+#          echo modify benchmark config...
+#          sed -i 's/^LOOP.*/LOOP=100000/g' ${benchmark_conf}
+#
+#          echo start benchmarking...
+#          cd ${benchmark_bin_home}
+#          nohup ./benchmark.sh >$bm_log_file &
+#          sleep .5
+#
+#          echo "::set-output name=benchmark-pid::$(jps -l | grep 'cn.edu.tsinghua.iotdb.benchmark.App' | awk '{print $1}')"
+#
+#          echo listening pid...
+#          while true; do
+#              if test $(jps -l | grep 'cn.edu.tsinghua.iotdb.benchmark.App' | awk '{print $1}'); then
+#                  tail -n 1 ${bm_log_file}
+#                  sleep 1
+#              else
+#                  echo done!
+#                  break
+#              fi
+#          done
+#
+#          echo kill IoTDB...
+#          kill -9 ${{ steps.run-iotdb.outputs.iotdb-pid }}
+#
+#      - name: Create release
+#        id: create_release
+#        uses: actions/create-release@v1
+#        env:
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#        with:
+#          tag_name: ${{ steps.datetime-information.outputs.date }}-0.12-${{ steps.iotdb-information.outputs.commit }}-java-${{ matrix.java }}
+#          release_name: Apache IoTDB 0.12 Nightly Performance Test Release (UTC+0 ${{ steps.datetime-information.outputs.date }}) (Java ${{ matrix.java }}) (Unofficial)
+#          body: |
+#            Apache IoTDB 0.12 Nightly Performance Test Release (Unofficial)
+#            IoTDB Branch: [rel/0.12](https://github.com/apache/iotdb/tree/rel/0.12)
+#            IoTDB commit ID: [${{ steps.iotdb-information.outputs.commit }}](https://github.com/apache/iotdb/commit/${{ steps.iotdb-information.outputs.commit }})
+#            Benchmark commit ID: [${{ steps.benchmark-information.outputs.commit }}](https://github.com/thulab/iotdb-benchmark/commit/${{ steps.benchmark-information.outputs.commit }})
+#            Build date: UTC+0 ${{ steps.datetime-information.outputs.date }}
+#            Java version: ${{ matrix.java }}
+#          draft: false
+#          prerelease: false
+#
+#      - name: Upload apache-iotdb-0.12.6-SNAPSHOT-all-bin.zip
+#        uses: actions/upload-release-asset@v1
+#        env:
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#        with:
+#          upload_url: ${{ steps.create_release.outputs.upload_url }}
+#          asset_path: ${{ steps.pwd.outputs.pwd }}/iotdb/distribution/target/apache-iotdb-0.12.6-SNAPSHOT-all-bin.zip
+#          asset_name: apache-iotdb-0.12.6-SNAPSHOT-all-bin-nightly-${{ steps.datetime-information.outputs.date }}-${{ steps.iotdb-information.outputs.commit }}-java-${{ matrix.java }}.zip
+#          asset_content_type: application/zip
+#
+#      - name: Upload apache-iotdb-0.12.6-SNAPSHOT-cli-bin.zip
+#        uses: actions/upload-release-asset@v1
+#        env:
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#        with:
+#          upload_url: ${{ steps.create_release.outputs.upload_url }}
+#          asset_path: ${{ steps.pwd.outputs.pwd }}/iotdb/distribution/target/apache-iotdb-0.12.6-SNAPSHOT-cli-bin.zip
+#          asset_name: apache-iotdb-0.12.6-SNAPSHOT-cli-bin-nightly-${{ steps.datetime-information.outputs.date }}-${{ steps.iotdb-information.outputs.commit }}-java-${{ matrix.java }}.zip
+#          asset_content_type: application/zip
+#
+#      - name: Upload apache-iotdb-0.12.6-SNAPSHOT-cluster-bin.zip
+#        uses: actions/upload-release-asset@v1
+#        env:
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#        with:
+#          upload_url: ${{ steps.create_release.outputs.upload_url }}
+#          asset_path: ${{ steps.pwd.outputs.pwd }}/iotdb/distribution/target/apache-iotdb-0.12.6-SNAPSHOT-cluster-bin.zip
+#          asset_name: apache-iotdb-0.12.6-SNAPSHOT-cluster-bin-nightly-${{ steps.datetime-information.outputs.date }}-${{ steps.iotdb-information.outputs.commit }}-java-${{ matrix.java }}.zip
+#          asset_content_type: application/zip
+#
+#      - name: Upload apache-iotdb-0.12.6-SNAPSHOT-grafana-bin.zip
+#        uses: actions/upload-release-asset@v1
+#        env:
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#        with:
+#          upload_url: ${{ steps.create_release.outputs.upload_url }}
+#          asset_path: ${{ steps.pwd.outputs.pwd }}/iotdb/distribution/target/apache-iotdb-0.12.6-SNAPSHOT-grafana-bin.zip
+#          asset_name: apache-iotdb-0.12.6-SNAPSHOT-grafana-bin-nightly-${{ steps.datetime-information.outputs.date }}-${{ steps.iotdb-information.outputs.commit }}-java-${{ matrix.java }}.zip
+#          asset_content_type: application/zip
+#
+#      - name: Upload apache-iotdb-0.12.6-SNAPSHOT-server-bin.zip
+#        uses: actions/upload-release-asset@v1
+#        env:
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#        with:
+#          upload_url: ${{ steps.create_release.outputs.upload_url }}
+#          asset_path: ${{ steps.pwd.outputs.pwd }}/iotdb/distribution/target/apache-iotdb-0.12.6-SNAPSHOT-server-bin.zip
+#          asset_name: apache-iotdb-0.12.6-SNAPSHOT-server-bin-nightly-${{ steps.datetime-information.outputs.date }}-${{ steps.iotdb-information.outputs.commit }}-java-${{ matrix.java }}.zip
+#          asset_content_type: application/zip
+#
+#      - name: Upload iotdb log
+#        uses: actions/upload-release-asset@v1
+#        env:
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#        with:
+#          upload_url: ${{ steps.create_release.outputs.upload_url }}
+#          asset_path: ${{ steps.pwd.outputs.pwd }}/iotdb/iotdb-log.txt
+#          asset_name: apache-iotdb-0.12.6-SNAPSHOT-server-bin-nightly-${{ steps.datetime-information.outputs.date }}-${{ steps.iotdb-information.outputs.commit }}-java-${{ matrix.java }}.log.txt
+#          asset_content_type: text/plain
+#
+#      - name: Upload iotdb-benchmark binary
+#        uses: actions/upload-release-asset@v1
+#        env:
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#        with:
+#          upload_url: ${{ steps.create_release.outputs.upload_url }}
+#          asset_path: ${{ steps.pwd.outputs.pwd }}/iotdb-benchmark/iotdb-0.12/target/iotdb-0.12-0.0.1.zip
+#          asset_name: iotdb-benchmark-0.12-${{ steps.datetime-information.outputs.date }}-${{ steps.benchmark-information.outputs.commit }}-java-${{ matrix.java }}.zip
+#          asset_content_type: application/zip
+#
+#      - name: Upload iotdb-benchmark log
+#        uses: actions/upload-release-asset@v1
+#        env:
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#        with:
+#          upload_url: ${{ steps.create_release.outputs.upload_url }}
+#          asset_path: ${{ steps.pwd.outputs.pwd }}/iotdb-benchmark/iotdb-0.12/target/iotdb-0.12-0.0.1/benchmark-log.txt
+#          asset_name: iotdb-benchmark-0.12-${{ steps.datetime-information.outputs.date }}-${{ steps.benchmark-information.outputs.commit }}-java-${{ matrix.java }}.log.txt
+#          asset_content_type: text/plain
+#
+#      - name: Upload iotdb-benchmark config.properties
+#        uses: actions/upload-release-asset@v1
+#        env:
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#        with:
+#          upload_url: ${{ steps.create_release.outputs.upload_url }}
+#          asset_path: ${{ steps.pwd.outputs.pwd }}/iotdb-benchmark/iotdb-0.12/target/iotdb-0.12-0.0.1/conf/config.properties
+#          asset_name: iotdb-benchmark-0.12-${{ steps.datetime-information.outputs.date }}-${{ steps.benchmark-information.outputs.commit }}-java-${{ matrix.java }}.config.properties
+#          asset_content_type: text/plain
 
       - name: Checkout performance-test grogram
         uses: actions/checkout@v2
