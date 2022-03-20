@@ -150,6 +150,11 @@ jobs:
           cd $PROGRAM_HOME
           python3 bin/run.py $BM_LOG_FILE_EXAMPLE $DB_FILE
 
+          echo "::set-output name=cur_throught::$(python3 src/contrast.py 'cur_throught' ${{ steps.pwd.outputs.pwd }}/db/benchmark.db)"
+          echo "::set-output name=cur_avg::$(python3 src/contrast.py 'cur_avg' ${{ steps.pwd.outputs.pwd }}/db/benchmark.db)"
+          echo "::set-output name=last_throught::$(python3 src/contrast.py 'last_throught' ${{ steps.pwd.outputs.pwd }}/db/benchmark.db)"
+          echo "::set-output name=last_avg::$(python3 src/contrast.py 'last_avg' ${{ steps.pwd.outputs.pwd }}/db/benchmark.db)"
+
       - name: upload db
         env:
           github_token: ${{ secrets.GITHUB_TOKEN }}
@@ -159,10 +164,6 @@ jobs:
           git config --local user.name "github-actions[bot]"
           git add benchmark.db
           git commit -m "Nightly Performance Test Results Upload UTC+0 ${{ steps.datetime-information.outputs.date }}"
-          echo ----------
-          echo git status
-          git status
-          echo ----------
           git push -u origin db
 
       - name: Create release
@@ -180,6 +181,9 @@ jobs:
             Benchmark commit ID: [${{ steps.benchmark-information.outputs.commit }}](https://github.com/thulab/iotdb-benchmark/commit/${{ steps.benchmark-information.outputs.commit }})
             Build date: UTC+0 ${{ steps.datetime-information.outputs.date }}
             Java version: ${{ matrix.java }}
+            last results: throught/s : ${{ steps.save-sql.outputs.last_throught }}, Ingestion Latency : ${{ steps.save-sql.outputs.last_avg }} ms
+            curr results: throught/s : ${{ steps.save-sql.outputs.cur_throught }}, Ingestion Latency : ${{ steps.save-sql.outputs.cur_avg }} ms
+
           draft: false
           prerelease: false
 
