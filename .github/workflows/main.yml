@@ -261,8 +261,16 @@ jobs:
           cd ${{ steps.pwd.outputs.pwd }}/db
           git config --local user.email "876670773+github-actions[bot]@qq.com"
           git config --local user.name "github-actions[bot]"
+          echo ----------
+          echo git status
+          git status
+          echo ----------
           git add benchmark.db
           git commit -m "Nightly Performance Test Results Upload UTC+0 ${{ steps.datetime-information.outputs.date }}"
+          echo ----------
+          echo git status
+          git status
+          echo ----------
 
       - name: Push db to db-branch
         uses: ad-m/github-push-action@master
