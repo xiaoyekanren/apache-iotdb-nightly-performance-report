@@ -257,24 +257,23 @@ jobs:
           python3 bin/run.py ${{ steps.pwd.outputs.pwd }}/apache-iotdb-nightly-performance-report/benchmark_log_parser/example_log.txt ${{ steps.pwd.outputs.pwd }}/db/benchmark.db
 
       - name: ready to upload db
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
         run: |
           cd ${{ steps.pwd.outputs.pwd }}/db
           git config --local user.email "876670773+github-actions[bot]@qq.com"
           git config --local user.name "github-actions[bot]"
-          echo ----------
-          echo git status
-          git status
-          echo ----------
           git add benchmark.db
           git commit -m "Nightly Performance Test Results Upload UTC+0 ${{ steps.datetime-information.outputs.date }}"
           echo ----------
           echo git status
           git status
           echo ----------
+          git push -u origin db
 
-      - name: Push db to db-branch
-        uses: ad-m/github-push-action@master
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          branch: db
-          directory: ${{ steps.pwd.outputs.pwd }}/db
+#      - name: Push db to db-branch
+#        uses: ad-m/github-push-action@master
+#        with:
+#          github_token: ${{ secrets.GITHUB_TOKEN }}
+#          branch: db
+#          directory: ${{ steps.pwd.outputs.pwd }}/db
