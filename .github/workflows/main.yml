@@ -154,6 +154,13 @@ jobs:
           echo "::set-output name=cur_avg::$(python3 src/contrast.py 'cur_avg' ${{ steps.pwd.outputs.pwd }}/db/benchmark.db)"
           echo "::set-output name=last_throught::$(python3 src/contrast.py 'last_throught' ${{ steps.pwd.outputs.pwd }}/db/benchmark.db)"
           echo "::set-output name=last_avg::$(python3 src/contrast.py 'last_avg' ${{ steps.pwd.outputs.pwd }}/db/benchmark.db)"
+          
+          echo -----
+          python3 src/contrast.py 'cur_throught' ${{ steps.pwd.outputs.pwd }}/db/benchmark.db
+          python3 src/contrast.py 'cur_avg' ${{ steps.pwd.outputs.pwd }}/db/benchmark.db
+          python3 src/contrast.py 'last_throught' ${{ steps.pwd.outputs.pwd }}/db/benchmark.db
+          python3 src/contrast.py 'last_avg' ${{ steps.pwd.outputs.pwd }}/db/benchmark.db
+          echo -----
 
       - name: upload db
         env:
