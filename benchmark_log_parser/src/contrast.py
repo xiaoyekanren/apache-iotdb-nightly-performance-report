@@ -16,13 +16,13 @@ def select_db_all(sql, db_path):
 def main(value, db_path):
     cur_line, last_line = select_db_all('select * from INGESTION order by id desc limit 2', db_path)
     if value == 'cur_throught':
-        print(cur_line[6])
+        print(cur_line[5])
     elif value == 'cur_avg':
-        print(cur_line[7])
+        print(cur_line[6])
     elif value == 'last_throught':
-        print(last_line[6])
+        print(last_line[5])
     elif value == 'last_avg':
-        print(last_line[7])
+        print(last_line[6])
 
 
 if __name__ == '__main__':
