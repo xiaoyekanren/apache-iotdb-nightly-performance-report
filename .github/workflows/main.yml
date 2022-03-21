@@ -16,7 +16,7 @@ jobs:
     strategy:
       max-parallel: 20
       matrix:
-        java: [ 8, 11 ]
+        java: [ 11 ]
         os: [ ubuntu-latest ]
 
     runs-on: ${{ matrix.os }}
@@ -89,22 +89,17 @@ jobs:
         env:
           benchmark_bin_home: ${{ steps.pwd.outputs.pwd }}/iotdb-benchmark/iotdb-0.12/target/iotdb-0.12-0.0.1
           bm_log_file: ${{ steps.pwd.outputs.pwd }}/iotdb-benchmark/iotdb-0.12/target/iotdb-0.12-0.0.1/benchmark-log.txt
+          benchmark_conf: ${{ steps.pwd.outputs.pwd }}/iotdb-benchmark/iotdb-0.12/target/iotdb-0.12-0.0.1/conf/config.properties
         run: |
           echo modify benchmark config...
-          modi_benchmark_config() {
-              benchmark_conf=${benchmark_bin_home}/conf/config.properties
-              sed -i 's/^LOOP.*/LOOP=100000/g' ${benchmark_conf}
-          }
-          modi_benchmark_config
+          sed -i 's/^LOOP.*/LOOP=100000/g' ${benchmark_conf}
 
           echo start benchmarking...
-          start_benchmark() {
-              cd ${benchmark_bin_home}
-              nohup ./benchmark.sh >${bm_log_file} &
-              sleep .5
-              echo "::set-output name=benchmark-pid::$(jps -l | grep 'cn.edu.tsinghua.iotdb.benchmark.App' | awk '{print $1}')"
-          }
-          start_benchmark
+          cd ${benchmark_bin_home}
+          nohup ./benchmark.sh >$bm_log_file &
+          sleep .5
+
+          echo "::set-output name=benchmark-pid::$(jps -l | grep 'cn.edu.tsinghua.iotdb.benchmark.App' | awk '{print $1}')"
 
           echo listening pid...
           while true; do
@@ -119,6 +114,57 @@ jobs:
 
           echo kill IoTDB...
           kill -9 ${{ steps.run-iotdb.outputs.iotdb-pid }}
+
+      - name: Checkout performance-test grogram
+        uses: actions/checkout@v2
+        with:
+          path: apache-iotdb-nightly-performance-report
+          repository: 'SteveYurongSu/apache-iotdb-nightly-performance-report'
+          ref: auto_upload_db
+          fetch-depth: 0
+
+      - name: Checkout db for save results
+        uses: actions/checkout@v2
+        with:
+          path: db
+          repository: 'SteveYurongSu/apache-iotdb-nightly-performance-report'
+          ref: db
+          fetch-depth: 0
+
+      - name: Write results to sql
+        id: save-sql
+        env:
+          PYTHONPATH: $PYTHONPATH:${{ steps.pwd.outputs.pwd }}/apache-iotdb-nightly-performance-report/benchmark_log_parser
+          PROGRAM_HOME: ${{ steps.pwd.outputs.pwd }}/apache-iotdb-nightly-performance-report/benchmark_log_parser
+          BM_LOG_FILE: ${{ steps.pwd.outputs.pwd }}/iotdb-benchmark/iotdb-0.12/target/iotdb-0.12-0.0.1/benchmark-log.txt
+          BM_LOG_FILE_EXAMPLE: ${{ steps.pwd.outputs.pwd }}/apache-iotdb-nightly-performance-report/benchmark_log_parser/example_log.txt
+          DB_FILE: ${{ steps.pwd.outputs.pwd }}/db/benchmark.db
+        run: |
+          echo $(java -version 2>&1 |head -n 1 | cut -d ' ' -f 3 | sed 's/"//g') > $PROGRAM_HOME/_java_version
+          echo ${{ steps.datetime-information.outputs.timestamp }} > $PROGRAM_HOME/_datetime_timestamp
+          echo ${{ steps.datetime-information.outputs.date }} > $PROGRAM_HOME/_datetime_date
+          echo ${{ steps.iotdb-information.outputs.commit }} > $PROGRAM_HOME/_iotdb_commit
+          echo ${{ steps.iotdb-information.outputs.branch }} > $PROGRAM_HOME/_iotdb_branch
+          echo ${{ steps.benchmark-information.outputs.commit }} > $PROGRAM_HOME/_benchmark_commit
+
+          cd $PROGRAM_HOME
+          python3 bin/run.py $BM_LOG_FILE $DB_FILE
+
+          echo "::set-output name=cur_throught::$(python3 src/contrast.py 'cur_throught' ${{ steps.pwd.outputs.pwd }}/db/benchmark.db)"
+          echo "::set-output name=cur_avg::$(python3 src/contrast.py 'cur_avg' ${{ steps.pwd.outputs.pwd }}/db/benchmark.db)"
+          echo "::set-output name=last_throught::$(python3 src/contrast.py 'last_throught' ${{ steps.pwd.outputs.pwd }}/db/benchmark.db)"
+          echo "::set-output name=last_avg::$(python3 src/contrast.py 'last_avg' ${{ steps.pwd.outputs.pwd }}/db/benchmark.db)"
+
+      - name: upload db
+        env:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cd ${{ steps.pwd.outputs.pwd }}/db
+          git config --local user.email "876670773+github-actions[bot]@qq.com"
+          git config --local user.name "github-actions[bot]"
+          git add benchmark.db
+          git commit -m "Nightly Performance Test Results Upload UTC+0 ${{ steps.datetime-information.outputs.date }}"
+          git push -u origin db
 
       - name: Create release
         id: create_release
@@ -135,6 +181,9 @@ jobs:
             Benchmark commit ID: [${{ steps.benchmark-information.outputs.commit }}](https://github.com/thulab/iotdb-benchmark/commit/${{ steps.benchmark-information.outputs.commit }})
             Build date: UTC+0 ${{ steps.datetime-information.outputs.date }}
             Java version: ${{ matrix.java }}
+            last results: throught/s : ${{ steps.save-sql.outputs.last_throught }}, Ingestion Latency : ${{ steps.save-sql.outputs.last_avg }} ms
+            curr results: throught/s : ${{ steps.save-sql.outputs.cur_throught }}, Ingestion Latency : ${{ steps.save-sql.outputs.cur_avg }} ms
+
           draft: false
           prerelease: false
 
@@ -227,27 +276,3 @@ jobs:
           asset_path: ${{ steps.pwd.outputs.pwd }}/iotdb-benchmark/iotdb-0.12/target/iotdb-0.12-0.0.1/conf/config.properties
           asset_name: iotdb-benchmark-0.12-${{ steps.datetime-information.outputs.date }}-${{ steps.benchmark-information.outputs.commit }}-java-${{ matrix.java }}.config.properties
           asset_content_type: text/plain
-
-      - name: Checkout apache-iotdb-nightly-performance-report
-        uses: actions/checkout@v2
-        with:
-          path: apache-iotdb-nightly-performance-report
-          repository: 'SteveYurongSu/apache-iotdb-nightly-performance-report'
-          ref: master
-          fetch-depth: 0
-
-      - name: Write results to sql
-        id: save-sql
-        env:
-          PYTHONPATH: $PYTHONPATH:${{ steps.pwd.outputs.pwd }}/apache-iotdb-nightly-performance-report/benchmark_log_parser
-          PROGRAM_HOME: ${{ steps.pwd.outputs.pwd }}/apache-iotdb-nightly-performance-report/benchmark_log_parser
-        run: |
-          echo $(java -version 2>&1 |head -n 1 | cut -d ' ' -f 3 | sed 's/"//g') > $PROGRAM_HOME/_java_version
-          echo ${{ steps.datetime-information.outputs.timestamp }} > $PROGRAM_HOME/_datetime_timestamp
-          echo ${{ steps.datetime-information.outputs.date }} > $PROGRAM_HOME/_datetime_date
-          echo ${{ steps.iotdb-information.outputs.commit }} > $PROGRAM_HOME/_iotdb_commit
-          echo ${{ steps.iotdb-information.outputs.branch }} > $PROGRAM_HOME/_iotdb_branch
-          echo ${{ steps.benchmark-information.outputs.commit }} > $PROGRAM_HOME/_benchmark_commit
-
-          cd $PROGRAM_HOME
-          python3 bin/run.py ${{ steps.pwd.outputs.pwd }}/iotdb-benchmark/iotdb-0.12/target/iotdb-0.12-0.0.1/benchmark-log.txt

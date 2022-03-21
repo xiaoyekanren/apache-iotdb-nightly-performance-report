@@ -21,9 +21,9 @@ def read_txt(txt_path):
         return data
 
 
-def user_input():
-    txt_path = input("输入解析文件地址:")
-    return txt_path
+# def user_input():
+#     txt_path = input("输入解析文件地址:")
+#     return txt_path
 
 
 def get_new_matrix_list(matrix_list):
@@ -53,16 +53,17 @@ def print_result(main_configurations_json, matrix_json):
     print("Result Matrix和Latency (ms) Matrix解析内容为：\n" + json.dumps(matrix_json, ensure_ascii=False) + "\n")
 
 
-def save_result_to_db(main_configurations_json, matrix_json):
+def save_result_to_db(main_configurations_json, matrix_json, db_path):
     """
     保存main_configurations_json
     :param main_configurations_json:
     :param matrix_json:
+    :param db_path
     :return:
     """
     java_version = read_txt('_java_version').replace('\n', '')
     datetime_timestamp = read_txt('_datetime_timestamp').replace('\n', '')
-    datetime_date = read_txt('_datetime_date').replace('\n', '')
+    # datetime_date = read_txt('_datetime_date').replace('\n', '')  # when need date type instead timestamp ,open and replace it
     iotdb_commit = read_txt('_iotdb_commit').replace('\n', '')
     benchmark_commit = read_txt('_benchmark_commit').replace('\n', '')
     iotdb_branch = read_txt('_iotdb_branch').replace('\n', '')
@@ -71,15 +72,15 @@ def save_result_to_db(main_configurations_json, matrix_json):
     value_name = "','".join(list(main_configurations_json.values()))
     # main_configurations_sql = "INSERT INTO LOG({}) VALUES ({})".format(key_name, "'" + value_name + "'")
     main_configurations_sql = f"INSERT INTO LOG({key_name},_JAVA_VERSION,_TEST_BEGINNING_TIME,_BENCHMARK_COMMIT_ID,_IOTDB_COMMIT_ID,_IOTDB_BRANCH) VALUES ('{value_name}','{java_version}','{datetime_timestamp}','{benchmark_commit}','{iotdb_commit}','{iotdb_branch}')"
-    insert_db(main_configurations_sql)
+    insert_db(main_configurations_sql, db_path)
     select_id_sql = 'SELECT MAX(LOGID) FROM LOG'
-    logid = select_db(select_id_sql)[0]
+    logid = select_db(select_id_sql, db_path)[0]
 
     for table_name in matrix_json.keys():
         value_list = matrix_json[table_name]
         matrix_value_name = "','".join(value_list)
         matrix_sql = "INSERT INTO {}(okOperation,okPoint,failOperation,failPoint,throughput,AVG,MIN,P10,P25,MEDIAN,P75,P90,P95,P99,P999,MAX,SLOWEST_THREAD,LOGID) VALUES ({})".format(
             table_name, "'" + matrix_value_name + "','" + str(logid) + "'")
-        insert_db(matrix_sql)
+        insert_db(matrix_sql, db_path)
 
     print("已将信息同步到数据库")
