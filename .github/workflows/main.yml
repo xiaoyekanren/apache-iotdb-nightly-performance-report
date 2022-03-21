@@ -120,7 +120,7 @@ jobs:
         with:
           path: apache-iotdb-nightly-performance-report
           repository: 'SteveYurongSu/apache-iotdb-nightly-performance-report'
-          ref: auto_upload_db
+          ref: master
           fetch-depth: 0
 
       - name: Checkout db for save results
