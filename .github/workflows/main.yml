@@ -195,7 +195,7 @@ jobs:
           draft: false
           prerelease: false
 
-      - name: Upload apache-iotdb-${IOTDB_VERSION}-SNAPSHOT-all-bin.zip
+      - name: Upload apache-iotdb-0.12.x-SNAPSHOT-all-bin.zip
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -205,7 +205,7 @@ jobs:
           asset_name: apache-iotdb-${IOTDB_VERSION}-SNAPSHOT-all-bin-nightly-${{ steps.datetime-information.outputs.date }}-${{ steps.iotdb-information.outputs.commit }}-java-${{ matrix.java }}.zip
           asset_content_type: application/zip
 
-      - name: Upload apache-iotdb-${IOTDB_VERSION}-SNAPSHOT-cli-bin.zip
+      - name: Upload apache-iotdb-0.12.x-SNAPSHOT-cli-bin.zip
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -215,7 +215,7 @@ jobs:
           asset_name: apache-iotdb-${IOTDB_VERSION}-SNAPSHOT-cli-bin-nightly-${{ steps.datetime-information.outputs.date }}-${{ steps.iotdb-information.outputs.commit }}-java-${{ matrix.java }}.zip
           asset_content_type: application/zip
 
-      - name: Upload apache-iotdb-${IOTDB_VERSION}-SNAPSHOT-cluster-bin.zip
+      - name: Upload apache-iotdb-0.12.x-SNAPSHOT-cluster-bin.zip
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -225,7 +225,7 @@ jobs:
           asset_name: apache-iotdb-${IOTDB_VERSION}-SNAPSHOT-cluster-bin-nightly-${{ steps.datetime-information.outputs.date }}-${{ steps.iotdb-information.outputs.commit }}-java-${{ matrix.java }}.zip
           asset_content_type: application/zip
 
-      - name: Upload apache-iotdb-${IOTDB_VERSION}-SNAPSHOT-grafana-bin.zip
+      - name: Upload apache-iotdb-0.12.x-SNAPSHOT-grafana-bin.zip
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -235,7 +235,7 @@ jobs:
           asset_name: apache-iotdb-${IOTDB_VERSION}-SNAPSHOT-grafana-bin-nightly-${{ steps.datetime-information.outputs.date }}-${{ steps.iotdb-information.outputs.commit }}-java-${{ matrix.java }}.zip
           asset_content_type: application/zip
 
-      - name: Upload apache-iotdb-${IOTDB_VERSION}-SNAPSHOT-server-bin.zip
+      - name: Upload apache-iotdb-0.12.x-SNAPSHOT-server-bin.zip
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
