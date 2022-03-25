@@ -14,9 +14,9 @@ env:
 jobs:
   test-0-12:
     strategy:
-      max-parallel: 20
+      max-parallel: 1
       matrix:
-        java: [ 11 ]
+        java: [ 8,11 ]
         os: [ ubuntu-latest ]
     runs-on: ${{ matrix.os }}
     env:
