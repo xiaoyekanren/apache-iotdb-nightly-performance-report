@@ -10,6 +10,7 @@ on:
 
 env:
   MAVEN_OPTS: -Dhttp.keepAlive=false -Dmaven.wagon.http.pool=false -Dmaven.wagon.http.retryHandler.class=standard -Dmaven.wagon.http.retryHandler.count=3 -Dmaven.wagon.httpconnectionManager.ttlSeconds=25
+  IOTDB_VERSION: 0.12.6
 
 jobs:
   test-0-12:
@@ -19,9 +20,6 @@ jobs:
         java: [ 8,11 ]
         os: [ ubuntu-latest ]
     runs-on: ${{ matrix.os }}
-    env:
-      IOTDB_VERSION: 0.12.6
-
     steps:
       - name: Current base dir
         id: pwd
