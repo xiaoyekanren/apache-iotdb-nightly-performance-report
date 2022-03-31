@@ -12,7 +12,7 @@ env:
   MAVEN_OPTS: -Dhttp.keepAlive=false -Dmaven.wagon.http.pool=false -Dmaven.wagon.http.retryHandler.class=standard -Dmaven.wagon.http.retryHandler.count=3 -Dmaven.wagon.httpconnectionManager.ttlSeconds=25
 
 jobs:
-  test-0-12:
+  test:
     strategy:
       max-parallel: 1
       matrix:
@@ -51,6 +51,7 @@ jobs:
           echo "::set-output name=commit::$(git rev-parse --short HEAD)"
           echo "::set-output name=branch::$(git branch |grep ^*|cut -d ' ' -f 2)"
           echo "::set-output name=iotdb_version::$(cat pom.xml  | egrep '^    <version>'|sed 's# ##g'|  sed 's#<version>##g' | sed 's#</version>##g')"
+          cat pom.xml  | egrep '^    <version>'|sed 's# ##g'|  sed 's#<version>##g' | sed 's#</version>##g')
 
       - name: Build Apache IoTDB binaries
         run: |
