@@ -164,17 +164,15 @@ jobs:
           cd $PROGRAM_HOME
           python3 bin/run.py $BM_LOG_FILE $DB_FILE
 
-          echo "::set-output name=cur_throught::$(python3 src/contrast.py 'cur_throught' ${{ steps.pwd.outputs.pwd }}/db/benchmark.db)"
-          echo "::set-output name=cur_avg::$(python3 src/contrast.py 'cur_avg' ${{ steps.pwd.outputs.pwd }}/db/benchmark.db)"
-          echo "::set-output name=last_throught::$(python3 src/contrast.py 'last_throught' ${{ steps.pwd.outputs.pwd }}/db/benchmark.db)"
-          echo "::set-output name=last_avg::$(python3 src/contrast.py 'last_avg' ${{ steps.pwd.outputs.pwd }}/db/benchmark.db)"
-          
-          echo -----
-          python3 src/contrast.py 'cur_throught' ${{ steps.pwd.outputs.pwd }}/db/benchmark.db
-          python3 src/contrast.py 'cur_avg' ${{ steps.pwd.outputs.pwd }}/db/benchmark.db
-          python3 src/contrast.py 'last_throught' ${{ steps.pwd.outputs.pwd }}/db/benchmark.db
-          python3 src/contrast.py 'last_avg' ${{ steps.pwd.outputs.pwd }}/db/benchmark.db
-          echo -----
+          echo "::set-output name=cur_throught::$(python3 src/contrast.py ${{ steps.pwd.outputs.pwd }}/db/benchmark.db) ${_iotdb_branch} ${_java_version} 'cur_throught'"
+          echo "::set-output name=cur_avg::$(python3 src/contrast.py ${{ steps.pwd.outputs.pwd }}/db/benchmark.db) ${_iotdb_branch} ${_java_version} 'cur_avg'"
+          echo "::set-output name=last_throught::$(python3 src/contrast.py ${{ steps.pwd.outputs.pwd }}/db/benchmark.db) ${_iotdb_branch} ${_java_version} 'last_throught'"
+          echo "::set-output name=last_avg::$(python3 src/contrast.py ${{ steps.pwd.outputs.pwd }}/db/benchmark.db) ${_iotdb_branch} ${_java_version} 'last_avg'" 
+
+          python3 src/contrast.py ${{ steps.pwd.outputs.pwd }}/db/benchmark.db) ${_iotdb_branch} ${_java_version} 'cur_throught'
+          python3 src/contrast.py ${{ steps.pwd.outputs.pwd }}/db/benchmark.db) ${_iotdb_branch} ${_java_version} 'cur_avg'
+          python3 src/contrast.py ${{ steps.pwd.outputs.pwd }}/db/benchmark.db) ${_iotdb_branch} ${_java_version} 'last_throught'
+          python3 src/contrast.py ${{ steps.pwd.outputs.pwd }}/db/benchmark.db) ${_iotdb_branch} ${_java_version} 'last_avg'"
 
       - name: upload db
         env:

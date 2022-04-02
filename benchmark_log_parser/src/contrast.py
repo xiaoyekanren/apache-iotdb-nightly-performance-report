@@ -13,17 +13,17 @@ def select_db_all(sql, db_path):
     return res
 
 
-def main(value, db_path):
-    cur_line, last_line = select_db_all('select * from INGESTION order by id desc limit 2', db_path)
+def main(db_path, iotdb_branch, java_version, value):
+    cur_line, last_line = select_db_all(f'select INGESTION.throughput,INGESTION.AVG from INGESTION,log where INGESTION.LOGID=log.LOGID and log._IOTDB_BRANCH="{iotdb_branch}" and log._JAVA_VERSION="{java_version}" order by id desc limit 2;', db_path)
     if value == 'cur_throught':
-        print(cur_line[5])
+        print(cur_line[0])
     elif value == 'cur_avg':
-        print(cur_line[6])
+        print(cur_line[1])
     elif value == 'last_throught':
-        print(last_line[5])
+        print(last_line[0])
     elif value == 'last_avg':
-        print(last_line[6])
+        print(last_line[1])
 
 
 if __name__ == '__main__':
-    main(sys.argv[1], sys.argv[2])
+    main(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4])
