@@ -82,10 +82,10 @@ jobs:
       - name: Build benchmark binaries
         run: |
           cd ${{ steps.pwd.outputs.pwd }}/iotdb-benchmark
-          mvn clean package -Dmaven.test.skip=true
-#          mvn clean package -pl core,iotdb-0.12 -Dmaven.test.skip=true
+#          mvn clean package -Dmaven.test.skip=true
+          mvn clean package -pl core,iotdb-0.12,iotdb-0.13 -Dmaven.test.skip=true
 
-      - name: Do performance test
+      - name: ready-test
         id: ready-test
         run: |
           if [ "${{ matrix.iotdb_version }}" = "rel/0.12" ]; then
