@@ -80,45 +80,45 @@ jobs:
           echo "::set-output name=commit::$(git rev-parse --short HEAD)"
 
       - name: Build benchmark binaries
+        id: compile-benchmark
         run: |
           cd ${{ steps.pwd.outputs.pwd }}/iotdb-benchmark
-          mvn clean package -pl core,iotdb-0.12,iotdb-0.13 -Dmaven.test.skip=true
-
-      - name: ready-test
-        id: ready-test
-        run: |
           if [ "${{ matrix.iotdb_version }}" = "rel/0.12" ]; then
+            mvn clean package -pl core,iotdb-0.12 -Dmaven.test.skip=true
             echo "::set-output name=benchmark-home::$(echo ${{ steps.pwd.outputs.pwd }}/iotdb-benchmark/iotdb-0.12/target/iotdb-0.12-0.0.1)"
           elif [ "${{ matrix.iotdb_version }}" = "rel/0.13" ]; then
+            mvn clean package -pl core,iotdb-0.13 -Dmaven.test.skip=true
             echo "::set-output name=benchmark-home::$(echo ${{ steps.pwd.outputs.pwd }}/iotdb-benchmark/iotdb-0.13/target/iotdb-0.13-0.0.1)"
           elif [ "${{ matrix.iotdb_version }}" = "master" ]; then
+            mvn clean package -pl core,iotdb-0.13 -Dmaven.test.skip=true
             echo "::set-output name=benchmark-home::$(echo ${{ steps.pwd.outputs.pwd }}/iotdb-benchmark/iotdb-0.13/target/iotdb-0.13-0.0.1)"
           fi
+#          mvn clean package -pl core,iotdb-0.12,iotdb-0.13 -Dmaven.test.skip=true
 
       - name: Do performance test
         id: performance-test
         run: |
           if [ "${{ matrix.iotdb_version }}" = "rel/0.12" ]; then
-            sed -i 's/^DB_SWITCH=.*/DB_SWITCH=IoTDB-012-SESSION_BY_TABLET/g' ${{ steps.ready-test.outputs.benchmark-home }}/conf/config.properties
+            sed -i 's/^DB_SWITCH=.*/DB_SWITCH=IoTDB-012-SESSION_BY_TABLET/g' ${{ steps.compile-benchmark.outputs.benchmark-home }}/conf/config.properties
           elif [ "${{ matrix.iotdb_version }}" = "rel/0.13" ]; then
-            sed -i 's/^DB_SWITCH=.*/DB_SWITCH=IoTDB-013-SESSION_BY_TABLET/g' ${{ steps.ready-test.outputs.benchmark-home }}/conf/config.properties
+            sed -i 's/^DB_SWITCH=.*/DB_SWITCH=IoTDB-013-SESSION_BY_TABLET/g' ${{ steps.compile-benchmark.outputs.benchmark-home }}/conf/config.properties
           elif [ "${{ matrix.iotdb_version }}" = "master" ]; then
-            sed -i 's/^DB_SWITCH=.*/DB_SWITCH=IoTDB-013-SESSION_BY_TABLET/g' ${{ steps.ready-test.outputs.benchmark-home }}/conf/config.properties
+            sed -i 's/^DB_SWITCH=.*/DB_SWITCH=IoTDB-013-SESSION_BY_TABLET/g' ${{ steps.compile-benchmark.outputs.benchmark-home }}/conf/config.properties
           fi
 
           echo modify benchmark config...
-          sed -i 's/^LOOP.*/LOOP=100000/g' ${{ steps.ready-test.outputs.benchmark-home }}/conf/config.properties
+          sed -i 's/^LOOP.*/LOOP=100000/g' ${{ steps.compile-benchmark.outputs.benchmark-home }}/conf/config.properties
 
           echo start benchmarking...
-          cd ${{ steps.ready-test.outputs.benchmark-home }}
-          nohup ./benchmark.sh > ${{ steps.ready-test.outputs.benchmark-home }}/benchmark-log.txt &
+          cd ${{ steps.compile-benchmark.outputs.benchmark-home }}
+          nohup ./benchmark.sh > ${{ steps.compile-benchmark.outputs.benchmark-home }}/benchmark-log.txt &
           sleep .5
 
           echo "::set-output name=benchmark-pid::$(jps -l | grep 'cn.edu.tsinghua.iotdb.benchmark.App' | awk '{print $1}')"
           echo listening pid...
           while true; do
               if test $(jps -l | grep 'cn.edu.tsinghua.iotdb.benchmark.App' | awk '{print $1}'); then
-                  tail -n 1 ${{ steps.ready-test.outputs.benchmark-home }}/benchmark-log.txt
+                  tail -n 1 ${{ steps.compile-benchmark.outputs.benchmark-home }}/benchmark-log.txt
                   sleep 2
               else
                   echo done!
@@ -150,7 +150,7 @@ jobs:
         env:
           PYTHONPATH: $PYTHONPATH:${{ steps.pwd.outputs.pwd }}/apache-iotdb-nightly-performance-report/benchmark_log_parser
           PROGRAM_HOME: ${{ steps.pwd.outputs.pwd }}/apache-iotdb-nightly-performance-report/benchmark_log_parser
-          BM_LOG_FILE: ${{ steps.ready-test.outputs.benchmark-home }}/benchmark-log.txt
+          BM_LOG_FILE: ${{ steps.compile-benchmark.outputs.benchmark-home }}/benchmark-log.txt
           BM_LOG_FILE_EXAMPLE: ${{ steps.pwd.outputs.pwd }}/apache-iotdb-nightly-performance-report/benchmark_log_parser/example_log.txt
           DB_FILE: ${{ steps.pwd.outputs.pwd }}/db/benchmark.db
         run: |
@@ -204,7 +204,6 @@ jobs:
             Java version: ${{ matrix.java }}
             last results: throught/s : ${{ steps.save-sql.outputs.last_throught }}, Ingestion Latency : ${{ steps.save-sql.outputs.last_avg }} ms
             curr results: throught/s : ${{ steps.save-sql.outputs.cur_throught }}, Ingestion Latency : ${{ steps.save-sql.outputs.cur_avg }} ms
-
           draft: false
           prerelease: false
 
@@ -288,17 +287,29 @@ jobs:
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: ${{ steps.pwd.outputs.pwd }}/iotdb/iotdb-log.txt
-          asset_name: apache-iotdb-${{ steps.iotdb-information.outputs.iotdb-version }}-server-bin-nightly-${{ steps.datetime-information.outputs.date }}-${{ steps.iotdb-information.outputs.commit }}-java-${{ matrix.java }}.log.txt
+          asset_name: performance-test-apache-iotdb-${{ steps.iotdb-information.outputs.iotdb-version }}-nightly-${{ steps.datetime-information.outputs.date }}-${{ steps.iotdb-information.outputs.commit }}-java-${{ matrix.java }}.log.txt
           asset_content_type: text/plain
 
       - name: Upload iotdb-benchmark binary
+        if: ${{ matrix.iotdb_version == 'rel/0.12' }}
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ${{ steps.pwd.outputs.pwd }}/iotdb-benchmark/iotdb-0.12/target/iotdb-0.12-0.0.1.zip
-          asset_name: iotdb-benchmark-0.12-${{ steps.datetime-information.outputs.date }}-${{ steps.benchmark-information.outputs.commit }}-java-${{ matrix.java }}.zip
+          asset_path: ${{ steps.compile-benchmark.outputs.benchmark-home }}/iotdb-0.12/target/iotdb-0.12-0.0.1.zip
+          asset_name: iotdb-benchmark-${{ steps.datetime-information.outputs.date }}-${{ steps.benchmark-information.outputs.commit }}-java-${{ matrix.java }}.zip
+          asset_content_type: application/zip
+
+      - name: Upload iotdb-benchmark binary
+        if: ${{ matrix.iotdb_version != 'rel/0.12' }}
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ${{ steps.compile-benchmark.outputs.benchmark-home }}/iotdb-0.13/target/iotdb-0.13-0.0.1.zip
+          asset_name: iotdb-benchmark-${{ steps.datetime-information.outputs.date }}-${{ steps.benchmark-information.outputs.commit }}-java-${{ matrix.java }}.zip
           asset_content_type: application/zip
 
       - name: Upload iotdb-benchmark log
@@ -307,8 +318,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ${{ steps.ready-test.outputs.benchmark-home }}/benchmark-log.txt
-          asset_name: iotdb-benchmark-0.12-${{ steps.datetime-information.outputs.date }}-${{ steps.benchmark-information.outputs.commit }}-java-${{ matrix.java }}.log.txt
+          asset_path: ${{ steps.compile-benchmark.outputs.benchmark-home }}/benchmark-log.txt
+          asset_name: performance-test-iotdb-benchmark-nightly-${{ steps.datetime-information.outputs.date }}-${{ steps.benchmark-information.outputs.commit }}-java-${{ matrix.java }}.log.txt
           asset_content_type: text/plain
 
       - name: Upload iotdb-benchmark config.properties
@@ -318,5 +329,5 @@ jobs:
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: ${{ steps.pwd.outputs.pwd }}/iotdb-benchmark/iotdb-0.12/target/iotdb-0.12-0.0.1/conf/config.properties
-          asset_name: iotdb-benchmark-0.12-${{ steps.datetime-information.outputs.date }}-${{ steps.benchmark-information.outputs.commit }}-java-${{ matrix.java }}.config.properties
+          asset_name: performance-test-iotdb-benchmark-nightly-${{ steps.datetime-information.outputs.date }}-${{ steps.benchmark-information.outputs.commit }}-java-${{ matrix.java }}.config.properties
           asset_content_type: text/plain
