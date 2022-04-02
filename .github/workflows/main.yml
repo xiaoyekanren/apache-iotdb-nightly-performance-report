@@ -328,6 +328,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ${{ steps.pwd.outputs.pwd }}/iotdb-benchmark/iotdb-0.12/target/iotdb-0.12-0.0.1/conf/config.properties
+          asset_path: ${{ steps.compile-benchmark.outputs.benchmark-home }}/conf/config.properties
           asset_name: performance-test-iotdb-benchmark-nightly-${{ steps.datetime-information.outputs.date }}-${{ steps.benchmark-information.outputs.commit }}-java-${{ matrix.java }}.config.properties
           asset_content_type: text/plain
