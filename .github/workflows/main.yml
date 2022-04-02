@@ -82,7 +82,6 @@ jobs:
       - name: Build benchmark binaries
         run: |
           cd ${{ steps.pwd.outputs.pwd }}/iotdb-benchmark
-#          mvn clean package -Dmaven.test.skip=true
           mvn clean package -pl core,iotdb-0.12,iotdb-0.13 -Dmaven.test.skip=true
 
       - name: ready-test
