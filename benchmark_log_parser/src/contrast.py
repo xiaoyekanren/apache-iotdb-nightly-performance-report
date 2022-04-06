@@ -15,7 +15,6 @@ def select_db_all(sql, db_path):
 
 def main(db_path, iotdb_branch, java_version, value):
     sql = f'select INGESTION.throughput,INGESTION.AVG from INGESTION,log where INGESTION.LOGID=log.LOGID and log._IOTDB_BRANCH="{iotdb_branch}" and log._JAVA_VERSION="{java_version}" order by id desc limit 2;'
-    print(sql)
     cur_line, last_line = select_db_all(sql, db_path)
     if value == 'cur_throught':
         print(cur_line[0])
