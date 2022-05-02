@@ -19,7 +19,7 @@ jobs:
         iotdb_version: [ rel/0.12,rel/0.13,master ]
         java: [ 8,11 ]
         os: [ ubuntu-latest ]
-    runs-on: ${{ matrix.os }}
+    runs-on: self-hosted
     steps:
       - name: Current base dir
         id: pwd
