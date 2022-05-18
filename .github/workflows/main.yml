@@ -60,7 +60,7 @@ jobs:
       - name: Run IoTDB
         id: run-iotdb
         run: |
-          cd ${{ steps.pwd.outputs.pwd }}/iotdb/distribution/target/apache-iotdb-${{ steps.iotdb-information.outputs.iotdb-version }}-all-bin/apache-iotdb-${{ steps.iotdb-information.outputs.iotdb-version }}-all-bin
+          cd ${{ steps.pwd.outputs.pwd }}/iotdb/distribution/target/apache-iotdb-${{ steps.iotdb-information.outputs.iotdb-version }}-server-bin/apache-iotdb-${{ steps.iotdb-information.outputs.iotdb-version }}-server-bin
           nohup sbin/start-server.sh >${{ steps.pwd.outputs.pwd }}/iotdb/iotdb-log.txt 2>&1 &
           sleep 5
           echo "::set-output name=iotdb-pid::$(jps -l | grep 'org.apache.iotdb.db.service.IoTDB' | awk '{print $1}')"
