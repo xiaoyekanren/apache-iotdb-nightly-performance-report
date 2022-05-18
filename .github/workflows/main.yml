@@ -221,6 +221,7 @@ jobs:
           asset_content_type: application/zip
 
       - name: Upload apache-iotdb-${{ steps.iotdb-information.outputs.iotdb-version }}-cluster-bin.zip
+        if: ${{ matrix.iotdb_version != 'master' }}
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
